@@ -12,3 +12,13 @@ Thumbs.db
 *.Zone.Identifier
 *.tmp
 output/
+
+# submissions runtime contents — keep folder structure, ignore files
+submissions/incoming/*
+submissions/processing/*
+submissions/completed/*
+submissions/failed/*
+!submissions/incoming/.gitkeep
+!submissions/processing/.gitkeep
+!submissions/completed/.gitkeep
+!submissions/failed/.gitkeep
