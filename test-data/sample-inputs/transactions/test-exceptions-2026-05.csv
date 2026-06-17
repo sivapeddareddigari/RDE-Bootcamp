@@ -1,0 +1,16 @@
+transaction_id,project_id,task_code,transaction_date,type,employee_id,role_code,description,quantity,unit,rate,amount,currency,classification,hold_flag,hold_reason,note
+TX-2026-05-0001,PRJ-NS-7421,T-100,2026-05-01,LABOR,E-1041,ENG2,Site survey prep,8.0,HRS,175.00,1400.00,USD,STD-TM-NA-CIVIC,N,,Clean labour line - no issues
+TX-2026-05-0002,PRJ-NS-7421,T-110,2026-05-02,LABOR,E-9001,PRIN,Strategy guidance for phase review,6.0,HRS,320.00,1920.00,USD,STD-TM-NA-CIVIC,Y,PRINCIPAL_CAP_EXCEEDED,Principal hours exceed 5% monthly cap - requires PL approval
+TX-2026-05-0003,PRJ-NS-7421,T-500,2026-05-03,LABOR,E-2210,ENG3,Internal team training - Python refresher,3.0,HRS,230.00,690.00,USD,STD-TM-NA-CIVIC,N,,Suspected miscoded - training should not be billed to client project
+TX-2026-05-0004,PRJ-NS-7421,T-100,2026-05-01,EXPENSE,E-1041,ENG2,Flight SFO-LAX outbound,1.0,EA,0.00,520.00,USD,STD-TM-NA-CIVIC,N,,Receipt RC-EX-001 on file - amount matches
+TX-2026-05-0005,PRJ-NS-7421,T-100,2026-05-02,EXPENSE,E-1041,ENG2,Hotel - night 1 Los Angeles,1.0,NGT,0.00,310.00,USD,STD-TM-NA-CIVIC,N,,Over metro lodging cap of USD 275 - no PL approval on file
+TX-2026-05-0006,PRJ-NS-7421,T-100,2026-05-02,EXPENSE,E-1041,ENG2,Team dinner - client meeting,1.0,EA,0.00,145.00,USD,STD-TM-NA-CIVIC,N,,Over meal cap of USD 90 - no PL approval on file
+TX-2026-05-0007,PRJ-NS-7421,T-100,2026-05-02,EXPENSE,E-1041,ENG2,Airport lounge access - LAX,1.0,EA,0.00,55.00,USD,STD-TM-NA-CIVIC,N,,Personal benefit - not reimbursable per contract
+TX-2026-05-0008,PRJ-NS-7421,T-100,2026-05-02,EXPENSE,E-1041,ENG2,Drinks at hotel bar,1.0,EA,0.00,38.00,USD,STD-TM-NA-CIVIC,N,,Alcohol - non-reimbursable per contract §4
+TX-2026-05-0009,PRJ-NS-7421,T-100,2026-05-03,EXPENSE,E-1041,ENG2,Ground transport - rideshare to site,1.0,EA,0.00,42.00,USD,STD-TM-NA-CIVIC,N,,No receipt attached - receipt required for expenses over USD 25
+TX-2026-05-0010,PRJ-NS-7421,T-100,2026-05-03,EXPENSE,E-2210,ENG3,Client lunch - 3 attendees,1.0,EA,0.00,67.50,USD,STD-TM-NA-CIVIC,N,,Receipt amount is EUR 74.25 - requires FX conversion to USD
+TX-2026-05-0011,PRJ-NS-7421,T-200,2026-05-04,EXPENSE,E-3055,PM1,Survey equipment rental,1.0,EA,0.00,185.00,USD,STD-TM-NA-CIVIC,N,,SAP amount 185.00 but vendor invoice shows 192.50 - mismatch of USD 7.50
+TX-2026-05-0012,PRJ-NS-7421,T-300,2026-05-05,EXPENSE,E-4501,ENG1,Subcontractor - aerial photography,1.0,EA,0.00,3500.00,USD,STD-TM-NA-CIVIC,N,,Subcontractor pass-through - 8% markup not applied. Should bill 3780.00
+TX-2026-05-0013,PRJ-NS-7421,T-100,2026-05-06,EXPENSE,E-1041,ENG2,Personal laundry at hotel,1.0,EA,0.00,28.00,USD,STD-TM-NA-CIVIC,N,,Personal item - not reimbursable per contract §4
+TX-2026-05-0014,PRJ-NS-7421,T-110,2026-05-07,EXPENSE,E-2210,ENG3,Mileage - home to airport return,168.0,MILES,0.67,112.56,USD,STD-TM-NA-CIVIC,N,,Mileage log not attached - required per contract
+TX-2026-05-0015,PRJ-NS-7421,T-100,2026-05-02,EXPENSE,E-1041,ENG2,Hotel - night 2 Los Angeles,1.0,NGT,0.00,275.00,USD,STD-TM-NA-CIVIC,N,,At metro cap exactly - clean line

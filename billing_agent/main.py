@@ -21,6 +21,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from billing_agent.ingestion import load_inputs
+from billing_agent import run_logger
 from billing_agent.config import (
     ACCEPTED_EXTENSIONS,
     COMPLETED_DIR,
@@ -48,25 +49,29 @@ def process_submission(submission_path: Path) -> None:
     Orchestrates the full billing review pipeline for one submission file.
     Each phase below will replace its TODO stub with a real call.
     """
-    log.info("    loading inputs ...")
-    inputs = load_inputs(submission_path)  # Phase 1 complete
+    run_logger.init_run(submission_path.name)
+    run_logger.step(f"Submission received — {submission_path.name}", "info")
 
-    log.info("    running rule engine ...")
+    run_logger.step("Phase 1 — loading all inputs", "info")
+    inputs = load_inputs(submission_path)
+
+    run_logger.step("Phase 2 — rule engine", "info")
     # TODO Phase 2 — rules.rule_engine.run(inputs)
 
-    log.info("    matching documents to transactions ...")
+    run_logger.step("Phase 3 — document matching & reconciliation", "info")
     # TODO Phase 3 — matching.matcher.reconcile(inputs)
 
-    log.info("    detecting exceptions ...")
+    run_logger.step("Phase 4 — exception detection & triage", "info")
     # TODO Phase 4 — exceptions.detector.run(inputs)
 
-    log.info("    building invoice ...")
+    run_logger.step("Phase 5 — invoice builder & outputs", "info")
     # TODO Phase 5 — output.invoice_builder.build(inputs)
 
-    log.info("    running supervisor agent ...")
+    run_logger.step("Phase 6 — supervisor agent reasoning", "info")
     # TODO Phase 6 — agents.supervisor.run(inputs)
 
-    log.info("    pipeline complete.")
+    run_logger.step("Pipeline complete", "ok")
+    run_logger.close_run(success=True)
 
 
 # ── Folder watcher ────────────────────────────────────────────────────────────
@@ -121,6 +126,8 @@ class DropFolderWatcher:
             log.info("── completed: %s", completed_path.name)
         except Exception:
             log.exception("── failed: %s", submission.name)
+            run_logger.step(f"Pipeline failed — see console for traceback", "error")
+            run_logger.close_run(success=False)
             failed_path = FAILED_DIR / _stamp(submission.name)
             if processing_path.exists():
                 shutil.move(str(processing_path), failed_path)
