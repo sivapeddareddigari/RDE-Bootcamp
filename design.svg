@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="819.9999999999999" height="819.9999999999999" viewBox="0 0 1080 1080" xml:space="preserve">
+<desc>Created with Fabric.js 6.5.3</desc>
+<defs>
+</defs>
+<g transform="matrix(1 0 0 1 358 119)"  >
+<rect style="stroke: rgb(95,94,90); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(241,239,232); fill-rule: nonzero; opacity: 1;"  x="-140" y="-50" rx="8" ry="8" width="280" height="100" />
+</g>
+<g transform="matrix(1 0 0 1 358 84.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(68,68,65); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-12.9233" y="4.398" >SAP</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 358 103.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(95,94,90); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-97.6143" y="3.7697" >System of record · existing · unchanged</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 287 137)"  >
+<rect style="stroke: rgb(95,94,90); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(241,239,232); fill-rule: nonzero; opacity: 1;"  x="-59" y="-20" rx="5" ry="5" width="118" height="40" />
+</g>
+<g transform="matrix(1 0 0 1 287 128.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(68,68,65); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-44.3276" y="4.398" >TRX + receipts</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 287 146.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(95,94,90); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-50.9678" y="3.7697" >Unbilled lines · holds</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 423 137)"  >
+<rect style="stroke: rgb(95,94,90); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(241,239,232); fill-rule: nonzero; opacity: 1;"  x="-63" y="-20" rx="5" ry="5" width="126" height="40" />
+</g>
+<g transform="matrix(1 0 0 1 423 128.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(68,68,65); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-49.2108" y="4.398" >Contracts · rates</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 423 146.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(95,94,90); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-49.0928" y="3.7697" >Draft invoice · notes</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 718 119)"  >
+<rect style="stroke: rgb(95,94,90); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(241,239,232); fill-rule: nonzero; opacity: 1;"  x="-140" y="-50" rx="8" ry="8" width="280" height="100" />
+</g>
+<g transform="matrix(1 0 0 1 718 84.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(68,68,65); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-78.6224" y="4.398" >SharePoint / Teams / Email</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 718 103.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(95,94,90); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-95.2617" y="3.7697" >Document store · existing · unchanged</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 647 137)"  >
+<rect style="stroke: rgb(95,94,90); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(241,239,232); fill-rule: nonzero; opacity: 1;"  x="-59" y="-20" rx="5" ry="5" width="118" height="40" />
+</g>
+<g transform="matrix(1 0 0 1 647 128.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(68,68,65); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-58.363" y="4.398" >Contracts · receipts</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 647 146.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(95,94,90); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-43.0342" y="3.7697" >Exception folders</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 783 137)"  >
+<rect style="stroke: rgb(95,94,90); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(241,239,232); fill-rule: nonzero; opacity: 1;"  x="-63" y="-20" rx="5" ry="5" width="126" height="40" />
+</g>
+<g transform="matrix(1 0 0 1 783 128.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(68,68,65); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-40.4129" y="4.398" >Teams · Email</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 783 146.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(95,94,90); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-51.3252" y="3.7697" >PL / PFA instructions</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 358 187)"  >
+<line style="stroke: rgb(136,135,128); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;"  x1="0" y1="-18" x2="0" y2="18" />
+</g>
+<g transform="matrix(1 0 0 1 718 187)"  >
+<line style="stroke: rgb(136,135,128); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;"  x1="0" y1="-18" x2="0" y2="18" />
+</g>
+<g transform="matrix(1 0 0 1 538 233)"  >
+<rect style="stroke: rgb(83,74,183); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(238,237,254); fill-rule: nonzero; opacity: 1;"  x="-200" y="-28" rx="8" ry="8" width="400" height="56" />
+</g>
+<g transform="matrix(1 0 0 1 538 220.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(60,52,137); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-92.0072" y="4.398" >Billing supervisor — LLM agent</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 538 241.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(83,74,183); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-165.2578" y="3.7697" >Daily trigger · holds TRX state · sequences pipelines · routes results</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 538 273)"  >
+<line style="stroke: rgb(83,74,183); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;"  x1="0" y1="-12" x2="0" y2="12" />
+</g>
+<g transform="matrix(1 0 0 1 538 285)"  >
+<line style="stroke: rgb(83,74,183); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;"  x1="-260" y1="0" x2="260" y2="0" />
+</g>
+<g transform="matrix(1 0 0 1 278 295)"  >
+<line style="stroke: rgb(83,74,183); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;"  x1="0" y1="-10" x2="0" y2="10" />
+</g>
+<g transform="matrix(1 0 0 1 438 295)"  >
+<line style="stroke: rgb(83,74,183); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;"  x1="0" y1="-10" x2="0" y2="10" />
+</g>
+<g transform="matrix(1 0 0 1 628 295)"  >
+<line style="stroke: rgb(83,74,183); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;"  x1="0" y1="-10" x2="0" y2="10" />
+</g>
+<g transform="matrix(1 0 0 1 798 295)"  >
+<line style="stroke: rgb(83,74,183); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;"  x1="0" y1="-10" x2="0" y2="10" />
+</g>
+<g transform="matrix(1 0 0 1 278 355)"  >
+<rect style="stroke: rgb(15,110,86); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(225,245,238); fill-rule: nonzero; opacity: 1;"  x="-60" y="-50" rx="6" ry="6" width="120" height="100" />
+</g>
+<g transform="matrix(1 0 0 1 278 320.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(8,80,65); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-31.5171" y="4.398" >Document</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 278 339.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(15,110,86); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-19.5967" y="3.7697" >pipeline</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 278 359.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(15,110,86); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-35.2998" y="3.7697" >Fetch receipts</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 278 377.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(15,110,86); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-35.874" y="3.7697" >Fetch SP docs</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 278 393.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(15,110,86); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-30.3721" y="3.7697" >Parse + split</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 438 355)"  >
+<rect style="stroke: rgb(15,110,86); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(225,245,238); fill-rule: nonzero; opacity: 1;"  x="-60" y="-50" rx="6" ry="6" width="120" height="100" />
+</g>
+<g transform="matrix(1 0 0 1 438 320.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(8,80,65); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-42.3646" y="4.398" >Reconciliation</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 438 339.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(15,110,86); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-19.5967" y="3.7697" >pipeline</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 438 359.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(15,110,86); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-45.3984" y="3.7697" >Match doc → TRX</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 438 377.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(15,110,86); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-29.6719" y="3.7697" >Check rules</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 438 393.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(15,110,86); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-24.3193" y="3.7697" >Flag gaps</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 628 355)"  >
+<rect style="stroke: rgb(133,79,11); stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(250,238,218); fill-rule: nonzero; opacity: 1;"  x="-60" y="-50" rx="6" ry="6" width="120" height="100" />
+</g>
+<g transform="matrix(1 0 0 1 628 320.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(99,56,6); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-29.8719" y="4.398" >Exception</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 628 338.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(99,56,6); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-29.7022" y="4.398" >reasoning</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 628 357.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(133,79,11); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-26.8564" y="3.7697" >LLM agent</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 628 377.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(133,79,11); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-36.0176" y="3.7697" >Pattern lookup</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 628 395.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(133,79,11); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-43.4473" y="3.7697" >PL guidance read</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 798 355)"  >
+<rect style="stroke: rgb(15,110,86); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(225,245,238); fill-rule: nonzero; opacity: 1;"  x="-60" y="-50" rx="6" ry="6" width="120" height="100" />
+</g>
+<g transform="matrix(1 0 0 1 798 320.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(8,80,65); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-25.8433" y="4.398" >Package</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 798 339.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(15,110,86); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-19.5967" y="3.7697" >pipeline</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 798 359.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(15,110,86); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-38.4434" y="3.7697" >Assemble docs</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 798 377.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(15,110,86); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-23.9268" y="3.7697" >Log to SP</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 798 395.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(15,110,86); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-34.3213" y="3.7697" >Notify analyst</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 358 355)"  >
+<line style="stroke: rgb(29,158,117); stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;"  x1="-20" y1="0" x2="20" y2="0" />
+</g>
+<g transform="matrix(1 0 0 1 533 355)"  >
+<line style="stroke: rgb(29,158,117); stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;"  x1="-35" y1="0" x2="35" y2="0" />
+</g>
+<g transform="matrix(1 0 0 1 713 355)"  >
+<line style="stroke: rgb(29,158,117); stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;"  x1="-25" y1="0" x2="25" y2="0" />
+</g>
+<g transform="matrix(1 0 0 1 628 423)"  >
+<line style="stroke: rgb(136,135,128); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;"  x1="0" y1="-18" x2="0" y2="18" />
+</g>
+<g transform="matrix(1 0 0 1 628 459)"  >
+<rect style="stroke: rgb(95,94,90); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(241,239,232); fill-rule: nonzero; opacity: 1;"  x="-90" y="-18" rx="18" ry="18" width="180" height="36" />
+</g>
+<g transform="matrix(1 0 0 1 628 454.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(68,68,65); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-43.9107" y="4.398" >Pattern found?</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 478 472)"  >
+<path style="stroke: rgb(29,158,117); stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;"  transform=" translate(-280, -419)" d="M 340 406 L 220 406 L 220 432" stroke-linecap="round" />
+</g>
+<g transform="matrix(1 0 0 1 474 449.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(61,61,58); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-8.666" y="3.7697" >yes</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 748 472)"  >
+<path style="stroke: rgb(216,90,48); stroke-width: 1; stroke-dasharray: 4 3; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;"  transform=" translate(-550, -419)" d="M 520 406 L 580 406 L 580 432" stroke-linecap="round" />
+</g>
+<g transform="matrix(1 0 0 1 750 449.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(61,61,58); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-27.0996" y="3.7697" >no — novel</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 418 507)"  >
+<rect style="stroke: rgb(15,110,86); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(225,245,238); fill-rule: nonzero; opacity: 1;"  x="-66" y="-22" rx="6" ry="6" width="132" height="44" />
+</g>
+<g transform="matrix(1 0 0 1 418 498.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(8,80,65); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-42.8038" y="4.398" >Auto-resolved</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 418 516.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(15,110,86); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-44.0449" y="3.7697" >Pattern reinforced</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 788 507)"  >
+<rect style="stroke: rgb(153,60,29); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(250,236,231); fill-rule: nonzero; opacity: 1;"  x="-74" y="-22" rx="6" ry="6" width="148" height="44" />
+</g>
+<g transform="matrix(1 0 0 1 788 498.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(113,43,19); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-50.9813" y="4.398" >Flag to employee</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 788 516.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(153,60,29); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-66.7236" y="3.7697" >Correct in SAP · re-triggers</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 641 456)"  >
+<path style="stroke: rgb(29,158,117); stroke-width: 0.5; stroke-dasharray: 3 2; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;"  transform=" translate(-443, -403)" d="M 286 454 L 600 454 L 600 352" stroke-linecap="round" />
+</g>
+<g transform="matrix(1 0 0 1 315 587)"  >
+<rect style="stroke: rgb(133,79,11); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(250,238,218); fill-rule: nonzero; opacity: 1;"  x="-97" y="-24" rx="6" ry="6" width="194" height="48" />
+</g>
+<g transform="matrix(1 0 0 1 315 577.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(99,56,6); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-69.2025" y="4.398" >Decision Memory store</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 315 597.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(133,79,11); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-92.8213" y="3.7697" >Pattern library · grows each resolution</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 529 587)"  >
+<rect style="stroke: rgb(133,79,11); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(250,238,218); fill-rule: nonzero; opacity: 1;"  x="-97" y="-24" rx="6" ry="6" width="194" height="48" />
+</g>
+<g transform="matrix(1 0 0 1 529 577.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(99,56,6); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-48.73" y="4.398" >Instruction store</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 529 597.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(133,79,11); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-100.9512" y="3.7697" >PL rules · standing decisions · per project</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 471.5 484)"  >
+<path style="stroke: rgb(186,117,23); stroke-width: 0.5; stroke-dasharray: 3 2; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;"  transform=" translate(-273.5, -431)" d="M 430 352 L 117 352 L 117 510" stroke-linecap="round" />
+</g>
+<g transform="matrix(1 0 0 1 578.5 484)"  >
+<path style="stroke: rgb(186,117,23); stroke-width: 0.5; stroke-dasharray: 3 2; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;"  transform=" translate(-380.5, -431)" d="M 430 352 L 331 352 L 331 510" stroke-linecap="round" />
+</g>
+<g transform="matrix(1 0 0 1 556.5 484)"  >
+<path style="stroke: rgb(186,117,23); stroke-width: 0.5; stroke-dasharray: 3 2; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;"  transform=" translate(-358.5, -431)" d="M 600 352 L 600 490 L 117 490 L 117 510" stroke-linecap="round" />
+</g>
+<g transform="matrix(1 0 0 1 483.5 484)"  >
+<path style="stroke: rgb(186,117,23); stroke-width: 0.5; stroke-dasharray: 3 2; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;"  transform=" translate(-285.5, -431)" d="M 240 352 L 240 490 L 331 490 L 331 510" stroke-linecap="round" />
+</g>
+<g transform="matrix(1 0 0 1 538 639)"  >
+<line style="stroke: rgb(136,135,128); stroke-width: 0.5; stroke-dasharray: 6 4; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;"  x1="-320" y1="0" x2="320" y2="0" />
+</g>
+<g transform="matrix(1 0 0 1 538 639)"  >
+<rect style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,255,255); fill-rule: nonzero; opacity: 1;"  x="-100" y="-10" rx="4" ry="4" width="200" height="20" />
+</g>
+<g transform="matrix(1 0 0 1 538 639.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(61,61,58); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-104.335" y="3.7697" >month-end process — triggered from SAP</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 545.0673 688.9855)"  >
+<rect style="stroke: rgb(95,94,90); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(241,239,232); fill-rule: nonzero; opacity: 1;"  x="-90" y="-24" rx="6" ry="6" width="180" height="48" />
+</g>
+<g transform="matrix(1 0 0 1 538.4859 683.8646)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(68,68,65); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-51.3601" y="4.398" >SAP draft invoice</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 542.4347 700.8587)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(95,94,90); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-87.4893" y="3.7697" >Auto-generated · month-end batch</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 798.5056 583.9213)"  >
+<rect style="stroke: rgb(15,110,86); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(225,245,238); fill-rule: nonzero; opacity: 1;"  x="-105" y="-24" rx="6" ry="6" width="210" height="48" />
+</g>
+<g transform="matrix(0.9653 0 0 0.9653 798.7205 576.2774)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(8,80,65); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-83.0384" y="4.398" >Package → notify employee</tspan></text>
+</g>
+<g transform="matrix(1.0772 0 0 1.1039 790.6363 593.542)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(15,110,86); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-91.2715" y="3.7697" >(+ Billing analyst if exception flagged</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 794.9663 536.3427)"  >
+<line style="stroke: rgb(29,158,117); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;"  x1="0" y1="-32.5" x2="0" y2="32.5" />
+</g>
+<g transform="matrix(1 0 0 1 775.5 642.5)"  >
+<line style="stroke: rgb(29,158,117); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;"  x1="22.5" y1="-14.5" x2="-22.5" y2="14.5" />
+</g>
+<g transform="matrix(1.1318 0 0 1.1318 535.9193 736.8192)"  >
+<line style="stroke: rgb(136,135,128); stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;"  x1="0" y1="-21" x2="0" y2="21" />
+</g>
+<g transform="matrix(1 0 0 1 538 771)"  >
+<rect style="stroke: rgb(95,94,90); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(241,239,232); fill-rule: nonzero; opacity: 1;"  x="-150" y="-24" rx="6" ry="6" width="300" height="48" />
+</g>
+<g transform="matrix(1 0 0 1 538 762.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(68,68,65); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-63.1868" y="4.398" >Billing Analyst review</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 538 782.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(95,94,90); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-133.3066" y="3.7697" >Exception list · pre-validated package · prior decisions</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 538 807)"  >
+<line style="stroke: rgb(136,135,128); stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;"  x1="0" y1="-12" x2="0" y2="12" />
+</g>
+<g transform="matrix(1 0 0 1 538 843)"  >
+<rect style="stroke: rgb(95,94,90); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(241,239,232); fill-rule: nonzero; opacity: 1;"  x="-150" y="-24" rx="6" ry="6" width="300" height="48" />
+</g>
+<g transform="matrix(1 0 0 1 538 834.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(68,68,65); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-91.3783" y="4.398" >Project Finance Analyst review</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 538 854.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(95,94,90); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-77.8916" y="3.7697" >Cost · margin · open exceptions</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 538 879)"  >
+<line style="stroke: rgb(136,135,128); stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;"  x1="0" y1="-12" x2="0" y2="12" />
+</g>
+<g transform="matrix(1 0 0 1 538 915)"  >
+<rect style="stroke: rgb(95,94,90); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(241,239,232); fill-rule: nonzero; opacity: 1;"  x="-150" y="-24" rx="6" ry="6" width="300" height="48" />
+</g>
+<g transform="matrix(1 0 0 1 538 906.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(68,68,65); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-64.754" y="4.398" >Project Lead approval</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 538 926.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(95,94,90); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-87.1582" y="3.7697" >Any channel · workflow unchanged</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 538 951)"  >
+<line style="stroke: rgb(136,135,128); stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;"  x1="0" y1="-12" x2="0" y2="12" />
+</g>
+<g transform="matrix(1 0 0 1 538 987)"  >
+<rect style="stroke: rgb(95,94,90); stroke-width: 0.5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(241,239,232); fill-rule: nonzero; opacity: 1;"  x="-150" y="-24" rx="6" ry="6" width="300" height="48" />
+</g>
+<g transform="matrix(1 0 0 1 538 978.6141)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="14" font-style="normal" font-weight="500" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(68,68,65); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-44.069" y="4.398" >Safe SAP write</tspan></text>
+</g>
+<g transform="matrix(1 0 0 1 538 998.2407)" style=""  >
+		<text xml:space="preserve" font-family="'Anthropic Sans', -apple-system, 'system-ui', 'Segoe UI', sans-serif" font-size="12" font-style="normal" font-weight="400" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(95,94,90); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-75.5068" y="3.7697" >Existing · dry-run · audit stamp</tspan></text>
+</g>
+</svg>
