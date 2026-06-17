@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import List
 
 from billing_agent.config import DATA_DIR
+from billing_agent import run_logger
 from billing_agent.ingestion.contract_parser import load_contract
 from billing_agent.ingestion.doc_parser import load_documents
 from billing_agent.ingestion.email_parser import load_instructions
@@ -87,11 +88,33 @@ def load_inputs(submission_path: Path) -> IngestionResult:
     log.info("── ingestion start: %s", submission_path.name)
 
     transactions = load_transactions(submission_path)
-    timecards    = load_timecards(_TIMECARD_PATH)
+    run_logger.step(
+        f"Loaded {len(transactions)} transactions "
+        f"({sum(t.is_labor for t in transactions)} labour, "
+        f"{sum(t.is_expense for t in transactions)} expense, "
+        f"{sum(t.is_on_hold for t in transactions)} held)"
+    )
+
+    timecards = load_timecards(_TIMECARD_PATH)
+    run_logger.step(f"Loaded {len(timecards)} timecard entries")
+
     rates, clauses = load_contract(_CONTRACT_PATH)
-    documents    = load_documents(_DOCS_DIR)
+    run_logger.step(f"Loaded contract — {len(rates)} role rates, {len(clauses)} expense clauses")
+
+    documents = load_documents(_DOCS_DIR)
+    composite = sum(d.is_composite for d in documents)
+    unreadable = sum(d.is_unreadable for d in documents)
+    alcohol = sum(d.has_alcohol for d in documents)
+    run_logger.step(
+        f"Loaded {len(documents)} backup documents "
+        f"({composite} composite, {unreadable} unreadable, {alcohol} with alcohol)"
+    )
+
     instructions = load_instructions(_EMAILS_PATH)
-    exceptions   = load_exceptions(_EXCEPTIONS_PATH)
+    run_logger.step(f"Loaded {len(instructions)} PL instructions")
+
+    exceptions = load_exceptions(_EXCEPTIONS_PATH)
+    run_logger.step(f"Loaded {len(exceptions)} prior exception patterns")
 
     result = IngestionResult(
         submission_file  = submission_path,
@@ -104,5 +127,6 @@ def load_inputs(submission_path: Path) -> IngestionResult:
         exceptions       = exceptions,
     )
 
+    run_logger.step("Ingestion complete — all inputs loaded and normalised")
     log.info("── ingestion complete\n%s", result.summary())
     return result
