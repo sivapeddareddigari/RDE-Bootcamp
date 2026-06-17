@@ -20,6 +20,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
+from billing_agent.ingestion import load_inputs
 from billing_agent.config import (
     ACCEPTED_EXTENSIONS,
     COMPLETED_DIR,
@@ -48,8 +49,7 @@ def process_submission(submission_path: Path) -> None:
     Each phase below will replace its TODO stub with a real call.
     """
     log.info("    loading inputs ...")
-    # TODO Phase 1 — ingestion.sap_loader, contract_parser, doc_parser, email_parser
-    # inputs = load_inputs(submission_path)
+    inputs = load_inputs(submission_path)  # Phase 1 complete
 
     log.info("    running rule engine ...")
     # TODO Phase 2 — rules.rule_engine.run(inputs)

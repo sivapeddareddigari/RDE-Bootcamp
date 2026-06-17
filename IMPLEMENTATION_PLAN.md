@@ -7,6 +7,108 @@
 
 ---
 
+## Progress Tracker
+
+| Phase | Description | Status | Commit |
+|-------|-------------|--------|--------|
+| Trigger | Drop folder watcher | **Done** | `10eea00` |
+| Phase 1 | Scaffolding & ingestion | **Done** | `(current)` |
+| Phase 2 | Rule engine | Pending | — |
+| Phase 3 | Matching & reconciliation | Pending | — |
+| Phase 4 | Exception detection & triage | Pending | — |
+| Phase 5 | Invoice builder & outputs | Pending | — |
+| Phase 6 | Agentic orchestration (Claude API) | Pending | — |
+| Phase 7 | Testing | Pending | — |
+
+**Phase 1 ingestion results (verified against test data):**
+- 50 transactions loaded (23 labour, 27 expense, 3 held)
+- 23 timecard entries
+- 15 backup documents (receipts, mileage logs, vendor invoices)
+- 6 rate table entries
+- 18 contract clauses
+- 5 PL email instructions
+- 10 prior exception cases
+
+---
+
+## How to Use the Trigger
+
+### Setup
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the watcher (from repo root)
+python -m billing_agent.main
+```
+
+You will see:
+```
+2026-06-17 21:00:00  INFO     ============================================================
+2026-06-17 21:00:00  INFO     Billing Review Agent — drop folder watcher started
+2026-06-17 21:00:00  INFO       Watching : /path/to/RDE-Bootcamp/submissions/incoming
+2026-06-17 21:00:00  INFO       Poll     : every 5s
+2026-06-17 21:00:00  INFO       Output   : /path/to/RDE-Bootcamp/output
+2026-06-17 21:00:00  INFO     ============================================================
+2026-06-17 21:00:00  INFO     Drop a submission CSV into 'incoming/' to trigger a run.
+2026-06-17 21:00:00  INFO     Press Ctrl+C to stop.
+```
+
+### Trigger a run
+
+Open a second terminal and drop the SAP transaction extract:
+
+```bash
+cp test-data/sample-inputs/transactions/unbilled-2026-04.csv submissions/incoming/
+```
+
+The watcher picks it up within 5 seconds:
+```
+2026-06-17 21:00:05  INFO     ── submission received: unbilled-2026-04.csv
+2026-06-17 21:00:05  INFO         loading inputs ...
+2026-06-17 21:00:05  INFO     Loaded 50 transactions from unbilled-2026-04.csv
+2026-06-17 21:00:05  INFO     Loaded 23 timecard entries from timecards-2026-04.csv
+2026-06-17 21:00:05  INFO     Loaded 6 rate entries and 18 contract clauses from contract-001.md
+2026-06-17 21:00:05  INFO     Loaded 15 documents from documents
+2026-06-17 21:00:05  INFO     Loaded 5 PL instructions from sample-emails.md
+2026-06-17 21:00:05  INFO     Loaded 10 prior exception cases from resolutions.csv
+2026-06-17 21:00:05  INFO     ── ingestion complete
+2026-06-17 21:00:05  INFO     ── completed: unbilled-2026-04__20260617T210005Z.csv
+```
+
+### What happens to the file
+
+```
+submissions/
+├── incoming/          ← you drop the CSV here
+│                         (disappears within 5 seconds)
+├── processing/        ← watcher moves it here mid-run
+│                         (empty when run is done)
+├── completed/         ← success: unbilled-2026-04__<timestamp>.csv
+└── failed/            ← error:   unbilled-2026-04__<timestamp>.csv
+```
+
+### Crash recovery
+
+If the process dies mid-run, any file left in `processing/` is automatically
+moved back to `incoming/` on the next startup — no manual intervention needed.
+
+### Re-triggering
+
+Drop the same file again for a re-run. The timestamped filename in `completed/`
+means each run is preserved and does not overwrite previous results.
+
+### Stop the watcher
+
+```bash
+Ctrl+C
+# or
+kill -TERM <pid>
+```
+
+---
+
 ## Architecture Overview
 
 Based on `design.svg`, the system uses **two LLM agents** and **three deterministic pipelines**:
