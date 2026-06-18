@@ -107,6 +107,18 @@ def _resolve_api_key() -> str:
     key = os.environ.get("ANTHROPIC_API_KEY", "")
     if key:
         return key
+    # Read from project .env file
+    env_path = Path(__file__).parent.parent.parent / ".env"
+    if env_path.exists():
+        for raw in env_path.read_text(encoding="utf-8").splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, _, v = line.partition("=")
+            if k.strip() == "ANTHROPIC_API_KEY":
+                key = v.strip().strip('"').strip("'")
+                if key:
+                    return key
     for settings_path in [
         Path(".claude/settings.local.json"),
         Path.home() / ".claude" / "settings.local.json",

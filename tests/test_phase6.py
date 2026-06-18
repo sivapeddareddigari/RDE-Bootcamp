@@ -248,9 +248,13 @@ class TestSupervisor:
         assert len(notice_files) >= 1
         assert len(summary_files) == 1
 
-    def test_fallback_no_llm_analyses(self, contacts):
+    def test_fallback_no_llm_analyses(self, contacts, monkeypatch):
         """Fallback path produces no LLM analyses (no API call made)."""
-        result = supervisor_run(SUBMISSION_CLEAN, contacts)
+        monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+        with patch("billing_agent.agents.supervisor._resolve_api_key", return_value=""), \
+             patch("billing_agent.agents.exception_agent._resolve_api_key", return_value=""), \
+             patch("anthropic.Anthropic", side_effect=Exception("no key")):
+            result = supervisor_run(SUBMISSION_CLEAN, contacts)
         assert result.analyses == []
         assert result.auto_resolved_by_llm == 0
 

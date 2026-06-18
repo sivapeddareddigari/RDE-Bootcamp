@@ -262,9 +262,14 @@ def _tool_write_notices(
         {a.transaction_id: a.employee_notice_text for a in s["analyses"] if a.employee_notice_text}
         if use_llm else {}
     )
+    llm_auto_resolved = (
+        {a.transaction_id for a in s["analyses"] if a.recommendation == "AUTO_RESOLVE"}
+        if use_llm else set()
+    )
     written = write_notices(
         s["inputs"], s["rule_results"], s["exception_report"], contacts,
         llm_texts=llm_texts,
+        llm_auto_resolved=llm_auto_resolved,
     )
     s["notices_written"] = written
     return json.dumps({
