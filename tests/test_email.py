@@ -273,7 +273,7 @@ class TestSendSubmission:
         notice   = _notice_file(tmp_path, "E-1041")
         sent_to  = []
 
-        def fake_send(self_m, to, subject, body, attachments=None):
+        def fake_send(self_m, to, subject, body, html_body=None, attachments=None):
             sent_to.extend(to)
             return True
 
@@ -289,7 +289,7 @@ class TestSendSubmission:
         summary  = _summary_file(tmp_path)
         sent_to  = []
 
-        def fake_send(self_m, to, subject, body, attachments=None):
+        def fake_send(self_m, to, subject, body, html_body=None, attachments=None):
             sent_to.extend(to)
             return True
 
@@ -306,7 +306,7 @@ class TestSendSubmission:
         summary  = _summary_file(tmp_path)
         sent_to  = []
 
-        def fake_send(self_m, to, subject, body, attachments=None):
+        def fake_send(self_m, to, subject, body, html_body=None, attachments=None):
             sent_to.extend(to)
             return True
 
@@ -323,7 +323,7 @@ class TestSendSubmission:
         notice   = _notice_file(tmp_path, "E-1041", cycle="2026-05")
         subjects = []
 
-        def fake_send(self_m, to, subject, body, attachments=None):
+        def fake_send(self_m, to, subject, body, html_body=None, attachments=None):
             subjects.append(subject)
             return True
 
@@ -339,7 +339,7 @@ class TestSendSubmission:
         notice.write_text("# Notice\n**Billing cycle:** 2026-04", encoding="utf-8")
         calls = []
 
-        def fake_send(self_m, to, subject, body, attachments=None):
+        def fake_send(self_m, to, subject, body, html_body=None, attachments=None):
             calls.append(to)
             return True
 
@@ -371,10 +371,11 @@ class TestSendInvoice:
 
         sent = {}
 
-        def fake_send(self_m, to, subject, body, attachments=None):
+        def fake_send(self_m, to, subject, body, html_body=None, attachments=None):
             sent["to"]   = to
             sent["subj"] = subject
             sent["body"] = body
+            sent["html"] = html_body or ""
             sent["att"]  = attachments or []
             return True
 
