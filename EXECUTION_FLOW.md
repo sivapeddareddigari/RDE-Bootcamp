@@ -1,7 +1,7 @@
 # Execution Flow: Agentic Billing Review System
 
 **Project:** Meridian Atlas Partners — Coastal Greenway (PRJ-NS-7421)  
-**Last updated:** 2026-06-18
+**Last updated:** 2026-06-18 (Phase 2 complete)
 
 This document describes what happens step-by-step when a submission file enters the system, how each phase transforms the data, and what flows into the next phase.
 
@@ -159,9 +159,10 @@ load_inputs(submission_path)
 
 ---
 
-## Phase 2 — Rule Engine  *(logic not yet built)*
+## Phase 2 — Rule Infrastructure  ✅ Complete
 
-**Entry point:** `rule_engine.run(inputs)` in `billing_agent/rules/rule_engine.py`  
+**Built:** `billing_agent/rules/sync_rules.py` + `billing_agent/rules/data/*.json`  
+**Runtime entry point (Phase 3):** `rule_engine.run(inputs)` in `billing_agent/rules/rule_engine.py`  
 **Input:** `IngestionResult`  
 **Output:** `List[RuleResult]` — one per transaction
 
@@ -169,22 +170,30 @@ load_inputs(submission_path)
 
 ```
 contract-001.md
-  └─► sync_rules.py (auto-triggered on save)
-        ├─► rules/data/expense_caps.json   lodging, meal, air, mileage, markup
-        ├─► rules/data/labour_rules.json   role rates, principal cap, travel time
-        └─► rules/data/policy_rules.json   alcohol/personal/entertainment flags
+  └─► sync_rules.py  ✅ built — auto-triggered on git commit or in-session edit
+        ├─► rules/data/expense_caps.json   ✅  lodging, meal, air, mileage, markup, receipt threshold
+        ├─► rules/data/labour_rules.json   ✅  role rates, principal cap, travel time
+        └─► rules/data/policy_rules.json   ✅  alcohol/personal/entertainment flags + override policy
 
-rules/data/keyword_lists.json              manually maintained detection words
+rules/data/keyword_lists.json  ✅  manually maintained — alcohol, personal items,
+                                    miscoded labour, airport lounge, entertainment
 
 IngestionResult
   ├─► instructions   PL email overrides for this cycle
   └─► exceptions     recurring prior-cycle resolution patterns
 ```
 
-### Execution steps (planned)
+### Auto-sync triggers
+
+| Trigger | When | How |
+|---------|------|-----|
+| `.githooks/pre-commit` | On `git commit` when `contract-001.md` is staged | Runs `sync_rules.py`, stages updated JSON files |
+| `.claude/settings.json` PostToolUse | When `contract-001.md` is edited in a Claude Code session | Runs `sync_rules.py` immediately after save |
+
+### Rule evaluation execution (wired in Phase 3)
 
 ```
-rule_engine.run(inputs)
+rule_engine.run(inputs)                       ← planned; reads built JSON files
   │
   ├─► load JSON rule files once at import time
   │

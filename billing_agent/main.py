@@ -58,7 +58,8 @@ def process_submission(submission_path: Path) -> None:
     inputs = load_inputs(submission_path)
 
     run_logger.step("Phase 2 — rule engine", "info")
-    # TODO Phase 2 — rules.rule_engine.run(inputs)
+    # Phase 2 data layer complete (rules/data/*.json + sync_rules.py)
+    # TODO Phase 3 wires rule_engine.run(inputs) once matching context is available
 
     run_logger.step("Phase 3 — document matching & reconciliation", "info")
     # TODO Phase 3 — matching.matcher.reconcile(inputs)
