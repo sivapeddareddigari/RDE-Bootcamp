@@ -249,6 +249,7 @@ def _write_invoice(
     lines: List[str] = []
     w = lines.append
 
+<<<<<<< Updated upstream
     w("# Draft Invoice — Coastal Greenway Feasibility Study (PRJ-NS-7421)")
     w("")
     w(f"**Invoice for:** Northstar Civic Group, Inc.  ")
@@ -260,6 +261,20 @@ def _write_invoice(
     w("")
     w("---")
     w("")
+=======
+    proj = inputs.contract_sap_project
+    _hdr(f"# Draft Invoice — Coastal Greenway Feasibility Study ({proj})")
+    _hdr("")
+    _hdr(f"**Invoice for:** Northstar Civic Group, Inc.  ")
+    _hdr(f"**Project:** Coastal Greenway Feasibility Study — Phase 2 ({proj})  ")
+    _hdr(f"**Cycle:** {_infer_cycle(inputs)}  ")
+    _hdr(f"**Submission:** {inputs.submission_file.name}  ")
+    _hdr(f"**Generated:** {ts}  ")
+    _hdr(f"**Currency:** USD  ")
+    _hdr("")
+    _hdr("---")
+    _hdr("")
+>>>>>>> Stashed changes
 
     # Section A — Labour
     w("## Section A — Labour")

@@ -52,6 +52,7 @@
 ### Contract constants loaded
 
 - 6 role rate entries · 18 contract clauses · 5 PL email instructions · 10 prior exception cases
+- **SAP project code** extracted from contract header (`**Project (SAP):**` field) and stored as `IngestionResult.contract_sap_project` — used to validate every incoming transaction's `project_id`
 
 ---
 
@@ -129,6 +130,7 @@ keyword_lists.json  ◄── manually maintained (detection keywords — no con
 
 ### Rule precedence (implemented order, first match wins)
 
+0. **PROJECT_MISMATCH** — `tx.project_id` ≠ `contract_sap_project` (hard reject; employee must recode in SAP)
 1. **HOLD_ITEM** — SAP-flagged holds (stop immediately)
 2. **POLICY_VIOLATION** — alcohol / lounge / personal (hard reject, no override)
 3. **MISCODED_LABOUR** — non-billable time descriptions (hard reject)
@@ -169,12 +171,14 @@ PL instructions are matched against each `RuleResult` using body-text regex (not
 |-------|----------|----------------|
 | **ANALYST** | AMOUNT_MISMATCH, RATE_MISMATCH, TRAVEL_RATE, TRAVEL_HRS_CAP, MILEAGE_RATE, CURRENCY, COMPOSITE_DOC, MARKUP_MISSING | Review amounts / FX conversion / confirm figures |
 | **PL** | LODGING_CAP, MEAL_CAP, PER_DIEM_CAP, HOLD_ITEM | Written approval or hold release |
-| **EMPLOYEE** | NO_RECEIPT, UNREADABLE_DOC, MISCODED, ALCOHOL, AIRPORT_LOUNGE, PERSONAL_ITEM | Submit receipt / correct SAP entry |
+| **EMPLOYEE** | NO_RECEIPT, UNREADABLE_DOC, MISCODED, ALCOHOL, AIRPORT_LOUNGE, PERSONAL_ITEM, **PROJECT_MISMATCH** | Submit receipt / correct SAP entry / recode to correct project |
 
 ### Blocking flag logic
 
 An item is blocking (prevents appearance on draft invoice) when its `rule_id` is in:
-`LODGING_CAP`, `MEAL_CAP`, `PER_DIEM_CAP`, `HOLD_ITEM`, `NO_RECEIPT`, `UNREADABLE_DOC`, `CURRENCY`, `MARKUP_MISSING`
+`PROJECT_MISMATCH`, `LODGING_CAP`, `MEAL_CAP`, `PER_DIEM_CAP`, `HOLD_ITEM`, `NO_RECEIPT`, `UNREADABLE_DOC`, `CURRENCY`, `MARKUP_MISSING`
+
+`PROJECT_MISMATCH` — hard reject, `approved_amount = $0`; transaction cannot appear on the invoice until the employee recodes it in SAP to `contract_sap_project`.
 
 `AMOUNT_MISMATCH` is not blocking — analyst can approve the receipt amount while the SAP discrepancy is investigated.
 
@@ -504,7 +508,7 @@ output/
 |--------|-----------|--------|---------|
 | `sap_loader.load_transactions()` | Dropped submission CSV | `List[Transaction]` | ✅ Submission only |
 | `sap_loader.load_timecards()` | `timecards-YYYY-MM.csv` (cycle-derived) | `List[TimecardEntry]` | ✅ Employees in submission |
-| `contract_parser.py` | `contract-001.md` | `List[ContractClause]`, `List[RateEntry]` | — (static ref) |
+| `contract_parser.py` | `contract-001.md` | `List[RateEntry]`, `List[ContractClause]`, `str` (SAP project code) | — (static ref) |
 | `doc_parser.load_documents()` | `documents/` directory | `List[ReceiptDocument]` | ✅ Doc IDs in note fields |
 | `email_parser.py` | `sample-emails.md` | `List[ProjectInstruction]` | — (static ref) |
 | `exception_loader.py` | `resolutions.csv` | `List[ExceptionCase]` | — (static ref) |
@@ -586,6 +590,7 @@ For each transaction:
 
 | Type | Description |
 |------|-------------|
+| `PROJECT_MISMATCH` | `tx.project_id` does not match the contract SAP project code — employee must recode |
 | `AMOUNT_MISMATCH` | Transaction ≠ receipt amount |
 | `MISSING_BACKUP` | No receipt found for expense >$25 |
 | `POLICY_VIOLATION` | Hard rule breach (alcohol, personal items) |

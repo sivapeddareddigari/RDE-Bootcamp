@@ -190,3 +190,19 @@ class TestStaticDataLoading:
     def test_loaded_at_is_set(self):
         result = load_inputs(SUBMISSION_CLEAN)
         assert result.loaded_at is not None
+
+    def test_contract_sap_project_extracted(self):
+        result = load_inputs(SUBMISSION_CLEAN)
+        assert result.contract_sap_project == "PRJ-NS-7421"
+
+    def test_contract_sap_project_non_empty_for_all_submissions(self):
+        from tests.conftest import (
+            SUBMISSION_OVER_CAP, SUBMISSION_HOLD_MISCODED,
+            SUBMISSION_PRINCIPAL_CAP, SUBMISSION_CURRENCY, SUBMISSION_SUBCON,
+        )
+        for sub in (SUBMISSION_CLEAN, SUBMISSION_OVER_CAP, SUBMISSION_HOLD_MISCODED,
+                    SUBMISSION_PRINCIPAL_CAP, SUBMISSION_CURRENCY, SUBMISSION_SUBCON):
+            result = load_inputs(sub)
+            assert result.contract_sap_project == "PRJ-NS-7421", (
+                f"{sub.name}: expected PRJ-NS-7421, got {result.contract_sap_project!r}"
+            )

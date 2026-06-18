@@ -407,4 +407,83 @@ class TestInferCycle:
     def test_fallback_for_no_date_in_name(self, tmp_path):
         class _Fake:
             submission_file = tmp_path / "submission-nodates.csv"
+<<<<<<< Updated upstream
         assert _infer_cycle(_Fake()) == "current"
+=======
+
+        result = _infer_cycle(_FakeIngestion())
+        assert result == "current"
+
+
+# ── Project ID mismatch rule ───────────────────────────────────────────────────
+
+from billing_agent.ingestion.loader import IngestionResult
+from billing_agent.exceptions import run as _detect_exceptions
+
+
+def _minimal_ingestion(project_id: str, contract_project: str, tmp_path) -> IngestionResult:
+    """One EXPENSE transaction; only fields the rule engine needs are set."""
+    tx = Transaction(
+        "TX-PROJ-001", project_id, "T-100", date.today(), "EXPENSE",
+        "E-001", "", "Hotel — 1 night", 1.0, "NIGHT", 200.0, 200.0,
+        "USD", "STD-TM-NA-CIVIC", False, "", "",
+    )
+    return IngestionResult(
+        submission_file      = tmp_path / "submission-test.csv",
+        transactions         = [tx],
+        contract_sap_project = contract_project,
+    )
+
+
+class TestProjectMismatch:
+
+    def test_wrong_project_id_is_rejected(self, tmp_path):
+        inputs = _minimal_ingestion("PRJ-NS-9999", "PRJ-NS-7421", tmp_path)
+        results = rule_engine.run(inputs)
+        assert len(results) == 1
+        r = results[0]
+        assert r.rule_id       == "PROJECT_MISMATCH"
+        assert r.status        == "REJECT"
+        assert r.approved_amount == 0.0
+
+    def test_wrong_project_id_note_contains_both_ids(self, tmp_path):
+        inputs = _minimal_ingestion("PRJ-NS-9999", "PRJ-NS-7421", tmp_path)
+        r = rule_engine.run(inputs)[0]
+        assert "PRJ-NS-9999"  in r.note
+        assert "PRJ-NS-7421"  in r.note
+
+    def test_matching_project_id_does_not_trigger_mismatch(self, tmp_path):
+        inputs = _minimal_ingestion("PRJ-NS-7421", "PRJ-NS-7421", tmp_path)
+        results = rule_engine.run(inputs)
+        assert all(r.rule_id != "PROJECT_MISMATCH" for r in results)
+
+    def test_mismatch_routes_to_hard_rejections(self, tmp_path):
+        inputs  = _minimal_ingestion("PRJ-NS-9999", "PRJ-NS-7421", tmp_path)
+        rr      = rule_engine.run(inputs)
+        er      = _detect_exceptions(inputs, rr, [])
+        assert len(er.hard_rejections) == 1
+        assert er.hard_rejections[0].rule_id == "PROJECT_MISMATCH"
+        assert len(er.escalate_employee) == 0
+
+    def test_mismatch_exception_type_is_project_mismatch(self, tmp_path):
+        inputs = _minimal_ingestion("PRJ-NS-9999", "PRJ-NS-7421", tmp_path)
+        rr     = rule_engine.run(inputs)
+        er     = _detect_exceptions(inputs, rr, [])
+        assert er.hard_rejections[0].exception_type == "PROJECT_MISMATCH"
+
+    def test_no_project_mismatch_in_clean_submission(self, clean):
+        _, rr, _, _, _ = clean
+        assert all(r.rule_id != "PROJECT_MISMATCH" for r in rr)
+
+    def test_no_project_mismatch_in_over_cap_submission(self, over_cap):
+        _, rr, _, _, _ = over_cap
+        assert all(r.rule_id != "PROJECT_MISMATCH" for r in rr)
+
+    def test_no_project_mismatch_in_hold_miscoded_submission(self, hold_miscoded):
+        _, rr, _, _, _ = hold_miscoded
+        assert all(r.rule_id != "PROJECT_MISMATCH" for r in rr)
+
+    def test_no_project_mismatch_in_subcon_submission(self, subcon):
+        _, rr, _, _, _ = subcon
+        assert all(r.rule_id != "PROJECT_MISMATCH" for r in rr)
+>>>>>>> Stashed changes

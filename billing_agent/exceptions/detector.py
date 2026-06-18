@@ -46,6 +46,7 @@ _PL_RULES = frozenset({
 
 # Unresolved items that prevent the line from appearing on the draft invoice
 _BLOCKING_RULES = frozenset({
+    "PROJECT_MISMATCH",                            # transaction coded to wrong SAP project
     "LODGING_CAP", "MEAL_CAP", "PER_DIEM_CAP",  # can't bill over cap without approval
     "HOLD_ITEM",                                   # SAP hold is still active
     "NO_RECEIPT", "UNREADABLE_DOC",               # no acceptable backup documentation

@@ -216,3 +216,225 @@ RUN  unit-tests  started 2026-06-18 14:20:49 UTC
 ------------------------------------------------------------------------
 RESULT  [unit-tests]  ✓ SUCCESS  completed 2026-06-18 14:20:53 UTC  (0.5s)
 
+========================================================================
+RUN  submission-E1041-clean-2026-05.csv  started 2026-06-18 17:55:40 UTC
+========================================================================
+2026-06-18 17:55:40  [submission-E1041-clean-2026-05.csv]  →  Submission received — submission-E1041-clean-2026-05.csv
+2026-06-18 17:55:40  [submission-E1041-clean-2026-05.csv]  →  Phase 1 — loading all inputs
+2026-06-18 17:55:40  [submission-E1041-clean-2026-05.csv]  ✓  Loaded 0 transactions (0 labour, 0 expense, 0 held)
+2026-06-18 17:55:40  [submission-E1041-clean-2026-05.csv]  →  Scope: 0 employee(s) [], 0 referenced document(s) []
+2026-06-18 17:55:40  [submission-E1041-clean-2026-05.csv]  ✓  Loaded 0 timecard entries for submission employees
+2026-06-18 17:55:40  [submission-E1041-clean-2026-05.csv]  ✓  Loaded contract — 6 role rates, 18 expense clauses
+2026-06-18 17:55:40  [submission-E1041-clean-2026-05.csv]  ✓  Loaded 15 backup documents (1 composite, 1 unreadable, 2 with alcohol)
+2026-06-18 17:55:40  [submission-E1041-clean-2026-05.csv]  ✓  Loaded 5 PL instructions
+2026-06-18 17:55:40  [submission-E1041-clean-2026-05.csv]  ✓  Loaded 10 prior exception patterns
+2026-06-18 17:55:40  [submission-E1041-clean-2026-05.csv]  ✓  Ingestion complete — all inputs loaded and normalised
+2026-06-18 17:55:40  [submission-E1041-clean-2026-05.csv]  →  Phase 2/3 — rule engine
+2026-06-18 17:55:40  [submission-E1041-clean-2026-05.csv]  ✓  Rule engine — 0 approved, 0 flagged, 0 rejected, 0 held, 0 overridden
+2026-06-18 17:55:40  [submission-E1041-clean-2026-05.csv]  →  Phase 3 — document matching & reconciliation
+2026-06-18 17:55:40  [submission-E1041-clean-2026-05.csv]  →  Phase 4 — exception detection & triage
+2026-06-18 17:55:40  [submission-E1041-clean-2026-05.csv]  ✓  Exception triage — 0 clean, 0 resolved, 0 rejected, 0 escalated (0 analyst / 0 employee / 0 PL)
+2026-06-18 17:55:40  [submission-E1041-clean-2026-05.csv]  →  Phase 5 — invoice builder & outputs
+2026-06-18 17:55:40  [submission-E1041-clean-2026-05.csv]  ✓  Invoice built — labour $0.00  expenses $0.00  total $0.00  (0 blocked)
+2026-06-18 17:55:40  [submission-E1041-clean-2026-05.csv]  →  Phase 6 — supervisor agent reasoning
+2026-06-18 17:55:40  [submission-E1041-clean-2026-05.csv]  ✓  Pipeline complete
+------------------------------------------------------------------------
+RESULT  [submission-E1041-clean-2026-05.csv]  ✓ SUCCESS  completed 2026-06-18 17:55:40 UTC  (0.1s)
+
+========================================================================
+RUN  submission-E1041-clean-2026-05__20260618T175540Z.csv  started 2026-06-18 17:59:40 UTC
+========================================================================
+2026-06-18 17:59:40  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  →  Submission received — submission-E1041-clean-2026-05__20260618T175540Z.csv
+2026-06-18 17:59:40  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  →  Phase 1 — loading all inputs
+2026-06-18 17:59:40  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  ✓  Loaded 3 transactions (2 labour, 1 expense, 0 held)
+2026-06-18 17:59:40  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  →  Scope: 1 employee(s) ['E-1041'], 0 referenced document(s) []
+2026-06-18 17:59:40  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  ✓  Loaded 6 timecard entries for submission employees
+2026-06-18 17:59:40  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  ✓  Loaded contract — 6 role rates, 18 expense clauses
+2026-06-18 17:59:40  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  ✓  Loaded 15 backup documents (1 composite, 1 unreadable, 2 with alcohol)
+2026-06-18 17:59:40  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  ✓  Loaded 5 PL instructions
+2026-06-18 17:59:40  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  ✓  Loaded 10 prior exception patterns
+2026-06-18 17:59:40  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  ✓  Ingestion complete — all inputs loaded and normalised
+2026-06-18 17:59:40  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  →  Phase 2/3 — rule engine
+2026-06-18 17:59:40  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  ⚠  Rule engine — 2 approved, 1 flagged, 0 rejected, 0 held, 0 overridden
+2026-06-18 17:59:40  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  →  Phase 3 — document matching & reconciliation
+2026-06-18 17:59:40  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  →  Phase 4 — exception detection & triage
+2026-06-18 17:59:40  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  ✗  Exception triage — 2 clean, 0 resolved, 0 rejected, 1 escalated (0 analyst / 1 employee / 0 PL), 1 BLOCKING invoice
+2026-06-18 17:59:40  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  →  Phase 5 — invoice builder & outputs
+2026-06-18 17:59:40  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  ⚠  Invoice built — labour $2,800.00  expenses $0.00  total $2,800.00  (1 blocked)
+2026-06-18 17:59:40  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  →  Phase 6 — supervisor agent reasoning
+2026-06-18 17:59:40  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  ✓  Pipeline complete
+------------------------------------------------------------------------
+RESULT  [submission-E1041-clean-2026-05__20260618T175540Z.csv]  ✓ SUCCESS  completed 2026-06-18 17:59:40 UTC  (0.0s)
+
+========================================================================
+RUN  submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv  started 2026-06-18 18:46:13 UTC
+========================================================================
+2026-06-18 18:46:13  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  →  Submission received — submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv
+2026-06-18 18:46:13  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  →  Phase 1 — loading all inputs
+2026-06-18 18:46:13  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  ✓  Loaded 3 transactions (2 labour, 1 expense, 0 held)
+2026-06-18 18:46:13  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  →  Scope: 1 employee(s) ['E-1041'], 1 referenced document(s) ['RC-020']
+2026-06-18 18:46:13  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  ✓  Loaded 6 timecard entries for submission employees
+2026-06-18 18:46:13  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  ✓  Loaded contract — 6 role rates, 18 expense clauses
+2026-06-18 18:46:13  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  ✓  Loaded 1 backup documents (0 composite, 0 unreadable, 0 with alcohol)
+2026-06-18 18:46:13  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  ✓  Loaded 5 PL instructions
+2026-06-18 18:46:13  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  ✓  Loaded 10 prior exception patterns
+2026-06-18 18:46:13  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  ✓  Ingestion complete — all inputs loaded and normalised
+2026-06-18 18:46:13  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  →  Phase 2/3 — rule engine
+2026-06-18 18:46:13  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  ⚠  Rule engine — 2 approved, 1 flagged, 0 rejected, 0 held, 0 overridden
+2026-06-18 18:46:13  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  →  Phase 3 — document matching & reconciliation
+2026-06-18 18:46:13  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  →  Phase 4 — exception detection & triage
+2026-06-18 18:46:13  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  ⚠  Exception triage — 2 clean, 0 resolved, 0 rejected, 1 escalated (1 analyst / 0 employee / 0 PL)
+2026-06-18 18:46:13  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  →  Phase 5 — invoice builder & outputs
+2026-06-18 18:46:13  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  ✓  Invoice built — labour $2,800.00  expenses $0.00  total $2,800.00  (0 blocked)
+2026-06-18 18:46:13  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  →  Phase 6 — supervisor agent reasoning
+2026-06-18 18:46:13  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  ✓  Pipeline complete
+------------------------------------------------------------------------
+RESULT  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z.csv]  ✓ SUCCESS  completed 2026-06-18 18:46:13 UTC  (0.0s)
+
+========================================================================
+RUN  submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv  started 2026-06-18 18:56:44 UTC
+========================================================================
+2026-06-18 18:56:44  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  →  Submission received — submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv
+2026-06-18 18:56:44  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  →  Phase 1 — loading all inputs
+2026-06-18 18:56:44  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  ✓  Loaded 3 transactions (2 labour, 1 expense, 0 held)
+2026-06-18 18:56:44  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  →  Scope: 1 employee(s) ['E-1041'], 1 referenced document(s) ['RC-020']
+2026-06-18 18:56:44  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  ✓  Loaded 6 timecard entries for submission employees
+2026-06-18 18:56:44  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  ✓  Loaded contract — 6 role rates, 18 expense clauses
+2026-06-18 18:56:44  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  ✓  Loaded 1 backup documents (0 composite, 0 unreadable, 0 with alcohol)
+2026-06-18 18:56:44  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  ✓  Loaded 5 PL instructions
+2026-06-18 18:56:44  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  ✓  Loaded 10 prior exception patterns
+2026-06-18 18:56:44  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  ✓  Ingestion complete — all inputs loaded and normalised
+2026-06-18 18:56:44  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  →  Phase 2/3 — rule engine
+2026-06-18 18:56:44  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  ⚠  Rule engine — 2 approved, 1 flagged, 0 rejected, 0 held, 0 overridden
+2026-06-18 18:56:44  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  →  Phase 3 — document matching & reconciliation
+2026-06-18 18:56:44  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  →  Phase 4 — exception detection & triage
+2026-06-18 18:56:44  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  ⚠  Exception triage — 2 clean, 0 resolved, 0 rejected, 1 escalated (1 analyst / 0 employee / 0 PL)
+2026-06-18 18:56:44  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  →  Phase 5 — invoice builder & outputs
+2026-06-18 18:56:44  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  ✓  Invoice built — labour $2,800.00  expenses $0.00  total $2,800.00  (0 blocked)
+2026-06-18 18:56:44  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  →  Phase 6 — supervisor agent reasoning
+2026-06-18 18:56:44  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  ✓  Pipeline complete
+------------------------------------------------------------------------
+RESULT  [submission-E1041-clean-2026-05__20260618T175540Z__20260618T175940Z__20260618T184613Z copy.csv]  ✓ SUCCESS  completed 2026-06-18 18:56:44 UTC  (0.0s)
+
+========================================================================
+RUN  submission-E1041-.csv  started 2026-06-18 19:05:34 UTC
+========================================================================
+2026-06-18 19:05:34  [submission-E1041-.csv]  →  Submission received — submission-E1041-.csv
+2026-06-18 19:05:34  [submission-E1041-.csv]  →  Phase 1 — loading all inputs
+2026-06-18 19:05:34  [submission-E1041-.csv]  ✓  Loaded 3 transactions (2 labour, 1 expense, 0 held)
+2026-06-18 19:05:34  [submission-E1041-.csv]  →  Scope: 1 employee(s) ['E-1041'], 1 referenced document(s) ['RC-020']
+2026-06-18 19:05:34  [submission-E1041-.csv]  ✓  Loaded 6 timecard entries for submission employees
+2026-06-18 19:05:34  [submission-E1041-.csv]  ✓  Loaded contract — 6 role rates, 18 expense clauses
+2026-06-18 19:05:34  [submission-E1041-.csv]  ✓  Loaded 1 backup documents (0 composite, 0 unreadable, 0 with alcohol)
+2026-06-18 19:05:34  [submission-E1041-.csv]  ✓  Loaded 5 PL instructions
+2026-06-18 19:05:34  [submission-E1041-.csv]  ✓  Loaded 10 prior exception patterns
+2026-06-18 19:05:34  [submission-E1041-.csv]  ✓  Ingestion complete — all inputs loaded and normalised
+2026-06-18 19:05:34  [submission-E1041-.csv]  →  Phase 2/3 — rule engine
+2026-06-18 19:05:34  [submission-E1041-.csv]  ⚠  Rule engine — 2 approved, 1 flagged, 0 rejected, 0 held, 0 overridden
+2026-06-18 19:05:34  [submission-E1041-.csv]  →  Phase 3 — document matching & reconciliation
+2026-06-18 19:05:34  [submission-E1041-.csv]  →  Phase 4 — exception detection & triage
+2026-06-18 19:05:34  [submission-E1041-.csv]  ⚠  Exception triage — 2 clean, 0 resolved, 0 rejected, 1 escalated (1 analyst / 0 employee / 0 PL)
+2026-06-18 19:05:34  [submission-E1041-.csv]  →  Phase 5 — invoice builder & outputs
+2026-06-18 19:05:34  [submission-E1041-.csv]  ✓  Invoice built — labour $2,800.00  expenses $0.00  total $2,800.00  (0 blocked)
+2026-06-18 19:05:34  [submission-E1041-.csv]  →  Phase 6 — supervisor agent reasoning
+2026-06-18 19:05:34  [submission-E1041-.csv]  ✓  Pipeline complete
+------------------------------------------------------------------------
+RESULT  [submission-E1041-.csv]  ✓ SUCCESS  completed 2026-06-18 19:05:34 UTC  (0.0s)
+
+========================================================================
+RUN  unit-tests  started 2026-06-18 19:07:40 UTC
+========================================================================
+2026-06-18 19:07:40  [unit-tests]  →  Unit test suite started — 0 test(s) discovered
+2026-06-18 19:07:40  [unit-tests]  ✓  Passed  : 0
+------------------------------------------------------------------------
+RESULT  [unit-tests]  ✗ FAILED  completed 2026-06-18 19:07:40 UTC  (0.1s)
+
+========================================================================
+RUN  submission-E1041-__20260618T190534Z.csv  started 2026-06-18 19:10:34 UTC
+========================================================================
+2026-06-18 19:10:34  [submission-E1041-__20260618T190534Z.csv]  →  Submission received — submission-E1041-__20260618T190534Z.csv
+2026-06-18 19:10:34  [submission-E1041-__20260618T190534Z.csv]  →  Phase 1 — loading all inputs
+2026-06-18 19:10:34  [submission-E1041-__20260618T190534Z.csv]  ✓  Loaded 3 transactions (2 labour, 1 expense, 0 held)
+2026-06-18 19:10:34  [submission-E1041-__20260618T190534Z.csv]  →  Scope: 1 employee(s) ['E-1041'], 1 referenced document(s) ['RC-020']
+2026-06-18 19:10:34  [submission-E1041-__20260618T190534Z.csv]  ✓  Loaded 6 timecard entries for submission employees
+2026-06-18 19:10:34  [submission-E1041-__20260618T190534Z.csv]  ✓  Loaded contract — 6 role rates, 18 expense clauses
+2026-06-18 19:10:34  [submission-E1041-__20260618T190534Z.csv]  ✓  Loaded 1 backup documents (0 composite, 0 unreadable, 0 with alcohol)
+2026-06-18 19:10:34  [submission-E1041-__20260618T190534Z.csv]  ✓  Loaded 5 PL instructions
+2026-06-18 19:10:34  [submission-E1041-__20260618T190534Z.csv]  ✓  Loaded 10 prior exception patterns
+2026-06-18 19:10:34  [submission-E1041-__20260618T190534Z.csv]  ✓  Ingestion complete — all inputs loaded and normalised
+2026-06-18 19:10:34  [submission-E1041-__20260618T190534Z.csv]  →  Phase 2/3 — rule engine
+2026-06-18 19:10:34  [submission-E1041-__20260618T190534Z.csv]  ⚠  Rule engine — 2 approved, 1 flagged, 0 rejected, 0 held, 0 overridden
+2026-06-18 19:10:34  [submission-E1041-__20260618T190534Z.csv]  →  Phase 3 — document matching & reconciliation
+2026-06-18 19:10:34  [submission-E1041-__20260618T190534Z.csv]  →  Phase 4 — exception detection & triage
+2026-06-18 19:10:34  [submission-E1041-__20260618T190534Z.csv]  ⚠  Exception triage — 2 clean, 0 resolved, 0 rejected, 1 escalated (1 analyst / 0 employee / 0 PL)
+2026-06-18 19:10:34  [submission-E1041-__20260618T190534Z.csv]  →  Phase 5 — invoice builder & outputs
+2026-06-18 19:10:34  [submission-E1041-__20260618T190534Z.csv]  ✓  Invoice built — labour $2,800.00  expenses $0.00  total $2,800.00  (0 blocked)
+2026-06-18 19:10:34  [submission-E1041-__20260618T190534Z.csv]  →  Phase 6 — supervisor agent reasoning
+2026-06-18 19:10:34  [submission-E1041-__20260618T190534Z.csv]  ✓  Pipeline complete
+------------------------------------------------------------------------
+RESULT  [submission-E1041-__20260618T190534Z.csv]  ✓ SUCCESS  completed 2026-06-18 19:10:34 UTC  (0.0s)
+
+========================================================================
+RUN  submission-E1041-__20260618T190534Z__20260618T191034Z.csv  started 2026-06-18 19:25:21 UTC
+========================================================================
+2026-06-18 19:25:21  [submission-E1041-__20260618T190534Z__20260618T191034Z.csv]  ✓  Loaded 3 transactions (2 labour, 1 expense, 0 held)
+2026-06-18 19:25:21  [submission-E1041-__20260618T190534Z__20260618T191034Z.csv]  →  Scope: 1 employee(s) ['E-1041'], 1 referenced document(s) ['RC-020']
+2026-06-18 19:25:21  [submission-E1041-__20260618T190534Z__20260618T191034Z.csv]  ✓  Loaded 6 timecard entries for submission employees
+2026-06-18 19:25:21  [submission-E1041-__20260618T190534Z__20260618T191034Z.csv]  ✓  Loaded contract — 6 role rates, 18 expense clauses, project SAP: PRJ-NS-7421
+2026-06-18 19:25:21  [submission-E1041-__20260618T190534Z__20260618T191034Z.csv]  ✓  Loaded 1 backup documents (0 composite, 0 unreadable, 0 with alcohol)
+2026-06-18 19:25:21  [submission-E1041-__20260618T190534Z__20260618T191034Z.csv]  ✓  Loaded 5 PL instructions
+2026-06-18 19:25:21  [submission-E1041-__20260618T190534Z__20260618T191034Z.csv]  ✓  Loaded 10 prior exception patterns
+2026-06-18 19:25:21  [submission-E1041-__20260618T190534Z__20260618T191034Z.csv]  ✓  Ingestion complete — all inputs loaded and normalised
+2026-06-18 19:25:21  [submission-E1041-__20260618T190534Z__20260618T191034Z.csv]  ⚠  Rule engine — 0 approved, 0 flagged, 3 rejected, 0 held, 0 overridden
+2026-06-18 19:25:21  [submission-E1041-__20260618T190534Z__20260618T191034Z.csv]  ✓  Exception triage — 0 clean, 0 resolved, 3 rejected, 0 escalated (0 analyst / 0 employee / 0 PL)
+2026-06-18 19:25:21  [submission-E1041-__20260618T190534Z__20260618T191034Z.csv]  ✓  Invoice built — labour $0.00  expenses $0.00  total $0.00  (0 blocked)
+========================================================================
+RUN  submission-E1041-.csv  started 2026-06-18 19:26:45 UTC
+========================================================================
+2026-06-18 19:26:45  [submission-E1041-.csv]  →  Submission received — submission-E1041-.csv
+2026-06-18 19:26:45  [submission-E1041-.csv]  →  Phase 1 — loading all inputs
+2026-06-18 19:26:45  [submission-E1041-.csv]  ✓  Loaded 3 transactions (2 labour, 1 expense, 0 held)
+2026-06-18 19:26:45  [submission-E1041-.csv]  →  Scope: 1 employee(s) ['E-1041'], 1 referenced document(s) ['RC-020']
+2026-06-18 19:26:45  [submission-E1041-.csv]  ✓  Loaded 6 timecard entries for submission employees
+2026-06-18 19:26:45  [submission-E1041-.csv]  ✓  Loaded contract — 6 role rates, 18 expense clauses, project SAP: PRJ-NS-7421
+2026-06-18 19:26:45  [submission-E1041-.csv]  ✓  Loaded 1 backup documents (0 composite, 0 unreadable, 0 with alcohol)
+2026-06-18 19:26:45  [submission-E1041-.csv]  ✓  Loaded 5 PL instructions
+2026-06-18 19:26:45  [submission-E1041-.csv]  ✓  Loaded 10 prior exception patterns
+2026-06-18 19:26:45  [submission-E1041-.csv]  ✓  Ingestion complete — all inputs loaded and normalised
+2026-06-18 19:26:45  [submission-E1041-.csv]  →  Phase 2/3 — rule engine
+2026-06-18 19:26:45  [submission-E1041-.csv]  ⚠  Rule engine — 0 approved, 0 flagged, 3 rejected, 0 held, 0 overridden
+2026-06-18 19:26:45  [submission-E1041-.csv]  →  Phase 3 — document matching & reconciliation
+2026-06-18 19:26:45  [submission-E1041-.csv]  →  Phase 4 — exception detection & triage
+2026-06-18 19:26:45  [submission-E1041-.csv]  ✓  Exception triage — 0 clean, 0 resolved, 3 rejected, 0 escalated (0 analyst / 0 employee / 0 PL)
+2026-06-18 19:26:45  [submission-E1041-.csv]  →  Phase 5 — invoice builder & outputs
+2026-06-18 19:26:45  [submission-E1041-.csv]  ✓  Invoice built — labour $0.00  expenses $0.00  total $0.00  (0 blocked)
+2026-06-18 19:26:45  [submission-E1041-.csv]  →  Phase 6 — supervisor agent reasoning
+2026-06-18 19:26:45  [submission-E1041-.csv]  ✓  Pipeline complete
+------------------------------------------------------------------------
+RESULT  [submission-E1041-.csv]  ✓ SUCCESS  completed 2026-06-18 19:26:45 UTC  (0.0s)
+
+========================================================================
+RUN  submission-E1041-1.csv  started 2026-06-18 19:28:40 UTC
+========================================================================
+2026-06-18 19:28:40  [submission-E1041-1.csv]  →  Submission received — submission-E1041-1.csv
+2026-06-18 19:28:40  [submission-E1041-1.csv]  →  Phase 1 — loading all inputs
+2026-06-18 19:28:40  [submission-E1041-1.csv]  ✓  Loaded 3 transactions (2 labour, 1 expense, 0 held)
+2026-06-18 19:28:40  [submission-E1041-1.csv]  →  Scope: 1 employee(s) ['E-1041'], 1 referenced document(s) ['RC-020']
+2026-06-18 19:28:40  [submission-E1041-1.csv]  ✓  Loaded 6 timecard entries for submission employees
+2026-06-18 19:28:40  [submission-E1041-1.csv]  ✓  Loaded contract — 6 role rates, 18 expense clauses, project SAP: PRJ-NS-7422
+2026-06-18 19:28:40  [submission-E1041-1.csv]  ✓  Loaded 1 backup documents (0 composite, 0 unreadable, 0 with alcohol)
+2026-06-18 19:28:40  [submission-E1041-1.csv]  ✓  Loaded 5 PL instructions
+2026-06-18 19:28:40  [submission-E1041-1.csv]  ✓  Loaded 10 prior exception patterns
+2026-06-18 19:28:40  [submission-E1041-1.csv]  ✓  Ingestion complete — all inputs loaded and normalised
+2026-06-18 19:28:40  [submission-E1041-1.csv]  →  Phase 2/3 — rule engine
+2026-06-18 19:28:40  [submission-E1041-1.csv]  ⚠  Rule engine — 2 approved, 1 flagged, 0 rejected, 0 held, 0 overridden
+2026-06-18 19:28:40  [submission-E1041-1.csv]  →  Phase 3 — document matching & reconciliation
+2026-06-18 19:28:40  [submission-E1041-1.csv]  →  Phase 4 — exception detection & triage
+2026-06-18 19:28:40  [submission-E1041-1.csv]  ⚠  Exception triage — 2 clean, 0 resolved, 0 rejected, 1 escalated (1 analyst / 0 employee / 0 PL)
+2026-06-18 19:28:40  [submission-E1041-1.csv]  →  Phase 5 — invoice builder & outputs
+2026-06-18 19:28:40  [submission-E1041-1.csv]  ✓  Invoice built — labour $2,800.00  expenses $0.00  total $2,800.00  (0 blocked)
+2026-06-18 19:28:40  [submission-E1041-1.csv]  →  Phase 6 — supervisor agent reasoning
+2026-06-18 19:28:40  [submission-E1041-1.csv]  ✓  Pipeline complete
+------------------------------------------------------------------------
+RESULT  [submission-E1041-1.csv]  ✓ SUCCESS  completed 2026-06-18 19:28:40 UTC  (0.0s)
+
