@@ -16,7 +16,7 @@
 | Phase 2 | Rule infrastructure & contract sync | ✅ Done | `6ea7ba5` |
 | Phase 3 | Rule engine evaluation, document matching & override resolution | ✅ Done | `1ca6104` |
 | Phase 4 | Exception detection & triage | ✅ Done | `HEAD` |
-| Phase 5 | Invoice builder & outputs | ⏳ Pending | — |
+| Phase 5 | Invoice builder & outputs | ✅ Done | `HEAD` |
 | Phase 6 | Agentic orchestration (Claude API) | ⏳ Pending | — |
 | Phase 7 | Testing | 🔄 In Progress | `624b1d5` → latest |
 
@@ -52,6 +52,7 @@
 ### Contract constants loaded
 
 - 6 role rate entries · 18 contract clauses · 5 PL email instructions · 10 prior exception cases
+- **SAP project code** extracted from contract header (`**Project (SAP):**` field) and stored as `IngestionResult.contract_sap_project` — used to validate every incoming transaction's `project_id`
 
 ---
 
@@ -129,6 +130,7 @@ keyword_lists.json  ◄── manually maintained (detection keywords — no con
 
 ### Rule precedence (implemented order, first match wins)
 
+0. **PROJECT_MISMATCH** — `tx.project_id` ≠ `contract_sap_project` (hard reject; employee must recode in SAP)
 1. **HOLD_ITEM** — SAP-flagged holds (stop immediately)
 2. **POLICY_VIOLATION** — alcohol / lounge / personal (hard reject, no override)
 3. **MISCODED_LABOUR** — non-billable time descriptions (hard reject)
@@ -169,12 +171,14 @@ PL instructions are matched against each `RuleResult` using body-text regex (not
 |-------|----------|----------------|
 | **ANALYST** | AMOUNT_MISMATCH, RATE_MISMATCH, TRAVEL_RATE, TRAVEL_HRS_CAP, MILEAGE_RATE, CURRENCY, COMPOSITE_DOC, MARKUP_MISSING | Review amounts / FX conversion / confirm figures |
 | **PL** | LODGING_CAP, MEAL_CAP, PER_DIEM_CAP, HOLD_ITEM | Written approval or hold release |
-| **EMPLOYEE** | NO_RECEIPT, UNREADABLE_DOC, MISCODED, ALCOHOL, AIRPORT_LOUNGE, PERSONAL_ITEM | Submit receipt / correct SAP entry |
+| **EMPLOYEE** | NO_RECEIPT, UNREADABLE_DOC, MISCODED, ALCOHOL, AIRPORT_LOUNGE, PERSONAL_ITEM, **PROJECT_MISMATCH** | Submit receipt / correct SAP entry / recode to correct project |
 
 ### Blocking flag logic
 
 An item is blocking (prevents appearance on draft invoice) when its `rule_id` is in:
-`LODGING_CAP`, `MEAL_CAP`, `PER_DIEM_CAP`, `HOLD_ITEM`, `NO_RECEIPT`, `UNREADABLE_DOC`, `CURRENCY`, `MARKUP_MISSING`
+`PROJECT_MISMATCH`, `LODGING_CAP`, `MEAL_CAP`, `PER_DIEM_CAP`, `HOLD_ITEM`, `NO_RECEIPT`, `UNREADABLE_DOC`, `CURRENCY`, `MARKUP_MISSING`
+
+`PROJECT_MISMATCH` — hard reject, `approved_amount = $0`; transaction cannot appear on the invoice until the employee recodes it in SAP to `contract_sap_project`.
 
 `AMOUNT_MISMATCH` is not blocking — analyst can approve the receipt amount while the SAP discrepancy is investigated.
 
@@ -191,9 +195,68 @@ An item is blocking (prevents appearance on draft invoice) when its `rule_id` is
 
 ---
 
+## Phase 5 — Completed (redesigned)
+
+Phase 5 was redesigned to reflect how the real billing workflow operates: invoice generation is a SAP month-end activity, not a per-submission step. The pipeline now has two distinct triggers.
+
+### Architecture — two triggers
+
+| Trigger | When | Command | Output |
+|---------|------|---------|--------|
+| **Watcher** (per-submission) | Drop-folder CSV arrives | auto | Employee notices + analyst summary |
+| **Invoice CLI** (month-end) | All submissions in for the month | `python3 -m billing_agent.invoice_run --project PRJ-NS-7421 --month 2026-04` | Draft invoice + exceptions report + audit trail |
+
+### What was built
+
+| Module | Description |
+|--------|-------------|
+| `data/contacts.json` | Contact directory — employee name/email/role, billing analyst, project lead per project |
+| `ingestion/contacts_loader.py` | `load_contacts()` → `ContactDirectory`; `.employee(id)` and `.project_lead(project_id)` lookups |
+| `output/notice_writer.py` | Per-submission: writes per-employee exception notices + analyst summary |
+| `output/invoice_builder.py` | Project-level month-end: re-reads all completed CSVs for project+month, re-runs Phases 1–4, aggregates into one invoice |
+| `output/__init__.py` | Package re-exports — `BuildResult`, `build`, `write_notices` |
+| `invoice_run.py` | CLI entry point for month-end invoice trigger |
+| `main.py` (updated) | Phase 5 now calls `write_notices()` instead of `build()`; `_contacts` loaded once at startup |
+
+### Per-submission output files (watcher trigger)
+
+| File | Format | Contents |
+|------|--------|----------|
+| `output/notices/exception-notice-{emp_id}-{stem}__{ts}.md` | Markdown | Addressed to employee by name; splits items into "Blocking" (must fix in SAP) and "Under review" tables; each item has plain-English corrective action |
+| `output/analyst-summary-{stem}__{ts}.md` | Markdown | Addressed to billing analyst; headline counts table; blocking items, escalation sections, auto-resolved items |
+
+### Project-level output files (invoice CLI — no timestamp, one canonical file per project+month)
+
+| File | Format | Contents |
+|------|--------|----------|
+| `output/draft-invoice-{project}-{month}.md` | Markdown | Section A (labour with Employee column), Section B (expenses by category), Totals, Excluded/Blocked items |
+| `output/audit-trail-{project}-{month}.csv` | CSV | 17 columns including `submission` and `employee_name`; one row per transaction across all submissions |
+| `output/exceptions-report-{project}-{month}.md` | Markdown | Project-wide exception summary — auto-resolved, rejections, escalations with employee names |
+
+### Key design decisions
+
+- **Re-process from `completed/`:** Invoice build re-runs Phases 1–4 on each completed submission CSV rather than persisting intermediate results. Idempotent and catches any rule changes between submission and month-end.
+- **One invoice per project per month:** `_find_submissions()` collects all CSVs in `completed/` whose name contains `billing_month`. A single canonical file is written — re-running overwrites the prior draft.
+- **Contacts config:** All email addresses and role labels maintained in `data/contacts.json`. Employee and analyst contacts are resolved by `ContactDirectory` in both notice_writer and invoice_builder.
+- **No hard-coding:** `_MARKUP_PCT` and `_MEAL_KWS` loaded from JSON at import (same source as rule engine).
+- **Subcontractor split:** when `_has_markup()` is True (override_applied + approved > original), the invoice shows two rows — cost line + markup line.
+
+### Project-level aggregation — all 6 submissions combined
+
+| Metric | Value |
+|--------|-------|
+| Submissions processed | 6 |
+| Labour total | $10,515.00 |
+| Expense total | $4,136.54 |
+| Grand total | $14,651.54 |
+| Blocked items | 9 |
+| Audit trail rows | 36 |
+
+---
+
 ## Phase 7 — Testing (In Progress)
 
-### Unit tests — 160 tests, all passing
+### Unit tests — 215 tests, all passing
 
 Run with: `python3 run_tests.py`  
 Results saved to: `output/Unit_test_runs/unit_test_run_<timestamp>.txt`  
@@ -205,6 +268,7 @@ Summary logged to: `output/billing_agent.log`
 | `tests/test_doc_parser.py` | 25 | Document ID filtering; composite/unreadable/alcohol/currency/type detection; line item extraction |
 | `tests/test_loader.py` | 34 | `_referenced_doc_ids` helper; timecard scoping per submission; document scoping; static data always loaded |
 | `tests/test_sync_rules.py` | 79 | JSON file existence and validity; all rule values from contract; builder functions with modified contract text; keyword list content; sync idempotency |
+| `tests/test_invoice_builder.py` | 55 | `ContactsLoader` (6 tests) — load + lookup helpers; `NoticeWriter` (12 tests) — employee notices, analyst summary content; `InvoiceBuild` (19 tests) — project-level aggregation, audit trail, invoice/exceptions content; `_categorize`, `_has_markup`, `_infer_cycle` helpers (18 tests) |
 
 ### Remaining test work (Phase 7 completion)
 
@@ -213,7 +277,6 @@ Summary logged to: `output/billing_agent.log`
 | `tests/test_rules.py` | ⏳ Pending | Each rule evaluation against known inputs |
 | `tests/test_matching.py` | ⏳ Pending | Doc-to-transaction linkage for all 12 complex cases |
 | `tests/test_currency.py` | ⏳ Pending | CAD→USD conversion for RC-015 |
-| `tests/test_invoice.py` | ⏳ Pending Phase 5 | End-to-end: 22 checkpoints against `expected-invoice.md` |
 
 ---
 
@@ -373,10 +436,13 @@ billing_agent/
 ├── agents/              ⏳  (Phase 6)
 │   ├── supervisor.py         LLM agent — orchestrates pipeline sequence
 │   └── exception_agent.py    LLM agent — pattern lookup + novel case routing
-└── output/              ⏳  (Phase 5)
-    ├── invoice_builder.py    Assemble final invoice lines
-    ├── audit_trail.py        Record per-line decision rationale
-    └── report_generator.py   Summary report, KPI dashboard
+├── data/                ✅  (Phase 5 — complete)
+│   └── contacts.json         ✅ Contact directory — employees, billing analysts, project leads
+├── invoice_run.py       ✅  (Phase 5) Month-end CLI: --project + --month args
+└── output/              ✅  (Phase 5 — complete)
+    ├── __init__.py           ✅ Re-exports BuildResult, build, write_notices
+    ├── notice_writer.py      ✅ Per-submission: employee notices + analyst summary
+    └── invoice_builder.py    ✅ Project-level month-end: draft invoice, audit trail, exceptions report
 
 tests/                   🔄  (Phase 7 — in progress)
 ├── conftest.py          ✅  Shared paths and submission fixture constants
@@ -384,10 +450,10 @@ tests/                   🔄  (Phase 7 — in progress)
 ├── test_doc_parser.py   ✅  25 tests — document parsing and filtering
 ├── test_loader.py       ✅  34 tests — scoped IngestionResult
 ├── test_sync_rules.py   ✅  79 tests — rule JSON values, sync, keyword lists, idempotency
-├── test_rules.py        ⏳  Rule evaluation against known inputs (pending Phase 3)
-├── test_matching.py     ⏳  Doc-to-transaction linkage (pending Phase 3)
-├── test_currency.py     ⏳  CAD→USD conversion (pending Phase 3)
-└── test_invoice.py      ⏳  End-to-end 22-checkpoint suite (pending Phase 5)
+├── test_invoice_builder.py ✅ 55 tests — contacts loader, notice writer, project-level invoice builder, helpers
+├── test_rules.py        ⏳  Rule evaluation against known inputs (pending)
+├── test_matching.py     ⏳  Doc-to-transaction linkage (pending)
+└── test_currency.py     ⏳  CAD→USD conversion (pending)
 
 run_tests.py             ✅  Pytest runner — saves timestamped result files +
                              appends pass/fail summary to billing_agent.log
@@ -411,6 +477,11 @@ test-data/sample-inputs/
 
 output/
 ├── billing_agent.log                 Append-mode run log (all submissions + test runs)
+├── notices/                          Per-employee exception notices (one per affected employee per submission)
+├── analyst-summary-{stem}__{ts}.md  Per-submission analyst summary
+├── draft-invoice-{project}-{month}.md  Month-end project invoice (overwritten on re-run)
+├── audit-trail-{project}-{month}.csv   36-column audit trail across all submissions
+├── exceptions-report-{project}-{month}.md  Project-wide exception summary
 └── Unit_test_runs/                   Timestamped test result files (one per run)
 ```
 
@@ -437,7 +508,7 @@ output/
 |--------|-----------|--------|---------|
 | `sap_loader.load_transactions()` | Dropped submission CSV | `List[Transaction]` | ✅ Submission only |
 | `sap_loader.load_timecards()` | `timecards-YYYY-MM.csv` (cycle-derived) | `List[TimecardEntry]` | ✅ Employees in submission |
-| `contract_parser.py` | `contract-001.md` | `List[ContractClause]`, `List[RateEntry]` | — (static ref) |
+| `contract_parser.py` | `contract-001.md` | `List[RateEntry]`, `List[ContractClause]`, `str` (SAP project code) | — (static ref) |
 | `doc_parser.load_documents()` | `documents/` directory | `List[ReceiptDocument]` | ✅ Doc IDs in note fields |
 | `email_parser.py` | `sample-emails.md` | `List[ProjectInstruction]` | — (static ref) |
 | `exception_loader.py` | `resolutions.csv` | `List[ExceptionCase]` | — (static ref) |
@@ -519,6 +590,7 @@ For each transaction:
 
 | Type | Description |
 |------|-------------|
+| `PROJECT_MISMATCH` | `tx.project_id` does not match the contract SAP project code — employee must recode |
 | `AMOUNT_MISMATCH` | Transaction ≠ receipt amount |
 | `MISSING_BACKUP` | No receipt found for expense >$25 |
 | `POLICY_VIOLATION` | Hard rule breach (alcohol, personal items) |

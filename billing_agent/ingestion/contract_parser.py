@@ -10,7 +10,7 @@ Extracts:
 import logging
 import re
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from billing_agent.models.contract import ContractClause, RateEntry
 
@@ -32,13 +32,14 @@ _CATEGORY_MAP = {
 }
 
 
-def load_contract(md_path: Path) -> Tuple[List[RateEntry], List[ContractClause]]:
+def load_contract(md_path: Path) -> Tuple[List[RateEntry], List[ContractClause], str]:
     text = md_path.read_text(encoding="utf-8")
-    rates   = _parse_rates(text)
-    clauses = _parse_expense_rules(text) + _parse_sap_notes(text)
-    log.info("Loaded %d rate entries and %d contract clauses from %s",
-             len(rates), len(clauses), md_path.name)
-    return rates, clauses
+    rates          = _parse_rates(text)
+    clauses        = _parse_expense_rules(text) + _parse_sap_notes(text)
+    project_sap    = _parse_project_sap_code(text)
+    log.info("Loaded %d rate entries and %d contract clauses from %s (project SAP: %s)",
+             len(rates), len(clauses), md_path.name, project_sap)
+    return rates, clauses, project_sap
 
 
 # ── Rate table ────────────────────────────────────────────────────────────────
@@ -128,6 +129,11 @@ def _parse_sap_notes(text: str) -> List[ContractClause]:
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
+def _parse_project_sap_code(text: str) -> str:
+    match = re.search(r"\*\*Project \(SAP\):\*\*\s*`([^`]+)`", text)
+    return match.group(1) if match else ""
+
+
 def _resolve_category(raw: str) -> str:
     for key, cat in _CATEGORY_MAP.items():
         if key in raw:
@@ -135,7 +141,7 @@ def _resolve_category(raw: str) -> str:
     return "OTHER"
 
 
-def _extract_cap(rule_text: str) -> float | None:
+def _extract_cap(rule_text: str) -> Optional[float]:
     match = re.search(r"USD\s*([\d,]+(?:\.\d+)?)", rule_text)
     if match:
         return float(match.group(1).replace(",", ""))

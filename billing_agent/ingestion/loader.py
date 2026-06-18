@@ -43,9 +43,10 @@ class IngestionResult:
     transactions:     List[Transaction]     = field(default_factory=list)
     timecards:        List[TimecardEntry]   = field(default_factory=list)
     documents:        List[ReceiptDocument] = field(default_factory=list)
-    rate_table:       List[RateEntry]       = field(default_factory=list)
-    contract_clauses: List[ContractClause]  = field(default_factory=list)
-    instructions:     List[ProjectInstruction] = field(default_factory=list)
+    rate_table:           List[RateEntry]       = field(default_factory=list)
+    contract_clauses:     List[ContractClause]  = field(default_factory=list)
+    contract_sap_project: str                   = ""
+    instructions:         List[ProjectInstruction] = field(default_factory=list)
     exceptions:       List[ExceptionCase]   = field(default_factory=list)
     loaded_at:        datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -134,8 +135,8 @@ def load_inputs(submission_path: Path) -> IngestionResult:
     timecards = load_timecards(timecard_path, employee_ids=employee_ids)
     run_logger.step(f"Loaded {len(timecards)} timecard entries for submission employees")
 
-    rates, clauses = load_contract(_CONTRACT_PATH)
-    run_logger.step(f"Loaded contract — {len(rates)} role rates, {len(clauses)} expense clauses")
+    rates, clauses, project_sap = load_contract(_CONTRACT_PATH)
+    run_logger.step(f"Loaded contract — {len(rates)} role rates, {len(clauses)} expense clauses, project SAP: {project_sap}")
 
     documents = load_documents(_DOCS_DIR, doc_ids=doc_ids if doc_ids else None)
     composite = sum(d.is_composite for d in documents)
@@ -153,14 +154,15 @@ def load_inputs(submission_path: Path) -> IngestionResult:
     run_logger.step(f"Loaded {len(exceptions)} prior exception patterns")
 
     result = IngestionResult(
-        submission_file  = submission_path,
-        transactions     = transactions,
-        timecards        = timecards,
-        documents        = documents,
-        rate_table       = rates,
-        contract_clauses = clauses,
-        instructions     = instructions,
-        exceptions       = exceptions,
+        submission_file      = submission_path,
+        transactions         = transactions,
+        timecards            = timecards,
+        documents            = documents,
+        rate_table           = rates,
+        contract_clauses     = clauses,
+        contract_sap_project = project_sap,
+        instructions         = instructions,
+        exceptions           = exceptions,
     )
 
     run_logger.step("Ingestion complete — all inputs loaded and normalised")

@@ -6,6 +6,7 @@ RuleResult per transaction. Rule values are read from the JSON files in
 billing_agent/rules/data/; nothing is hard-coded in this module.
 
 Rule order (first match wins for hard-stop rules):
+  0. PROJECT_MISMATCH   tx.project_id ≠ contract SAP project — hard reject
   1. HOLD_ITEM           SAP-flagged holds — stop, no further rules
   2. POLICY_VIOLATION    alcohol / lounge / personal items — hard reject
   3. MISCODED_LABOUR     non-billable time descriptions — hard reject
@@ -75,7 +76,8 @@ _MEAL_KWS     = set(_KWS["meals"])
 def run(inputs: IngestionResult) -> List[RuleResult]:
     """Evaluate all rules for every transaction. Returns one RuleResult per tx."""
     docs_by_id: Dict[str, ReceiptDocument] = {d.doc_id: d for d in inputs.documents}
-    results = [_evaluate(tx, docs_by_id) for tx in inputs.transactions]
+    contract_project = inputs.contract_sap_project
+    results = [_evaluate(tx, docs_by_id, contract_project) for tx in inputs.transactions]
     results = apply_overrides(
         results, inputs.instructions, inputs.exceptions, inputs.transactions
     )
@@ -85,9 +87,14 @@ def run(inputs: IngestionResult) -> List[RuleResult]:
 
 # ── Per-transaction evaluation ────────────────────────────────────────────────
 
-def _evaluate(tx: Transaction, docs_by_id: Dict[str, ReceiptDocument]) -> RuleResult:
+def _evaluate(tx: Transaction, docs_by_id: Dict[str, ReceiptDocument], contract_project: str) -> RuleResult:
     doc  = _find_doc(tx.note, docs_by_id)
     desc = tx.description.lower()
+
+    # 0. Project ID must match the contract SAP project
+    if contract_project and tx.project_id != contract_project:
+        return _make(tx, "REJECT", "PROJECT_MISMATCH", "PROJECT_MISMATCH", 0.0,
+                     f"Project ID '{tx.project_id}' does not match contract project '{contract_project}'")
 
     # 1. SAP hold flag (stop immediately)
     if tx.hold_flag:

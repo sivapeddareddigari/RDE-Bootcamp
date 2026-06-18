@@ -16,7 +16,7 @@ import logging
 import re
 from datetime import date
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from billing_agent.models.instruction import ProjectInstruction
 
@@ -51,7 +51,7 @@ def _split_emails(text: str) -> List[str]:
     return blocks
 
 
-def _parse_email(block: str, idx: int) -> ProjectInstruction | None:
+def _parse_email(block: str, idx: int) -> Optional[ProjectInstruction]:
     headers = {m.group(1): m.group(2).strip() for m in _HEADER_FIELD.finditer(block)}
     if not headers:
         return None
@@ -109,7 +109,7 @@ def _infer_scope(subject: str, body: str) -> str:
     return ", ".join(scope_parts) if scope_parts else "general"
 
 
-def _extract_amount(body: str) -> float | None:
+def _extract_amount(body: str) -> Optional[float]:
     m = _AMOUNT.search(body)
     if m:
         raw = m.group(1) or m.group(2)

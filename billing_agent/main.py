@@ -22,10 +22,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from billing_agent.ingestion import load_inputs
+from billing_agent.ingestion.contacts_loader import load_contacts
 from billing_agent import run_logger
 from billing_agent.rules import rule_engine
 from billing_agent.matching import reconcile
 from billing_agent.exceptions import run as detect_exceptions
+from billing_agent.output import write_notices
 from billing_agent.config import (
     ACCEPTED_EXTENSIONS,
     COMPLETED_DIR,
@@ -49,10 +51,20 @@ log = logging.getLogger(__name__)
 
 # ── Pipeline stub (filled in by later phases) ─────────────────────────────────
 
+_contacts = load_contacts()
+
+
 def process_submission(submission_path: Path) -> None:
     """
-    Orchestrates the full billing review pipeline for one submission file.
-    Each phase below will replace its TODO stub with a real call.
+    Orchestrates the per-submission billing review pipeline.
+
+    Phases 1–4 evaluate the employee's transactions and detect exceptions.
+    Phase 5 writes exception notices to each affected employee and an
+    aggregate summary to the billing analyst.
+
+    The project-level draft invoice is NOT produced here — that is a
+    month-end activity run separately via:
+        python3 -m billing_agent.invoice_run --project PRJ-NS-7421 --month YYYY-MM
     """
     run_logger.init_run(submission_path.name)
     run_logger.step(f"Submission received — {submission_path.name}", "info")
@@ -69,11 +81,11 @@ def process_submission(submission_path: Path) -> None:
     run_logger.step("Phase 4 — exception detection & triage", "info")
     exception_report = detect_exceptions(inputs, rule_results, match_results)
 
-    run_logger.step("Phase 5 — invoice builder & outputs", "info")
-    # TODO Phase 5 — output.invoice_builder.build(inputs)
+    run_logger.step("Phase 5 — employee notices & analyst summary", "info")
+    write_notices(inputs, rule_results, exception_report, _contacts)
 
     run_logger.step("Phase 6 — supervisor agent reasoning", "info")
-    # TODO Phase 6 — agents.supervisor.run(inputs)
+    # TODO Phase 6 — agents.supervisor.run(inputs, exception_report, _contacts)
 
     run_logger.step("Pipeline complete", "ok")
     # run_logger.close_run() is called by _handle after the file is safely archived
