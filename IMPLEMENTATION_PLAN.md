@@ -14,7 +14,7 @@
 | Trigger | Drop folder watcher | ✅ Done | `e078864` |
 | Phase 1 | Scaffolding & ingestion | ✅ Done | `e078864` → `624b1d5` |
 | Phase 2 | Rule infrastructure & contract sync | ✅ Done | `6ea7ba5` |
-| Phase 3 | Matching & reconciliation | ⏳ Pending | — |
+| Phase 3 | Rule engine evaluation, document matching & override resolution | ✅ Done | `1ca6104` |
 | Phase 4 | Exception detection & triage | ⏳ Pending | — |
 | Phase 5 | Invoice builder & outputs | ⏳ Pending | — |
 | Phase 6 | Agentic orchestration (Claude API) | ⏳ Pending | — |
@@ -101,19 +101,54 @@ keyword_lists.json  ◄── manually maintained (detection keywords — no con
 - `.githooks/pre-commit` — fires on `git commit` whenever `contract-001.md` is staged
 - `.claude/settings.json` PostToolUse hook — fires immediately when `contract-001.md` is edited in a Claude Code session
 
-### Rule engine evaluation (Phase 3 dependency)
+---
 
-The JSON files are the single source of truth. The rule evaluation code (reading these files and checking each transaction) is wired in during Phase 3 when the matching engine produces `MatchResult` objects that give rules the document context they need (amounts, currency, composite/unreadable flags). Planned modules:
+## Phase 3 — Completed
 
-| Module | Reads | Checks |
-|--------|-------|--------|
-| `rules/models.py` | — | Defines `RuleResult` dataclass |
-| `rules/rule_engine.py` | all JSON | Orchestrates per-transaction evaluation, returns `List[RuleResult]` |
-| `rules/contract_rules.py` | `policy_rules.json`, `keyword_lists.json` | Alcohol, personal items, receipt threshold, document quality |
-| `rules/cap_rules.py` | `expense_caps.json` | Lodging, meal, mileage, air class caps |
-| `rules/labour_rules.py` | `labour_rules.json`, `keyword_lists.json` | Rate validation, miscoded time, principal cap, travel-time rate |
-| `rules/subcontractor_rules.py` | `expense_caps.json` | 8% markup presence and amount |
-| `rules/override_resolver.py` | `IngestionResult` | Applies PL instructions and recurring exception patterns |
+### What was built
+
+| Module | Description | Commit |
+|--------|-------------|--------|
+| `rules/models.py` | `RuleResult` dataclass — status (APPROVE/FLAG/REJECT/HOLD), exception_type, rule_id, override info, original/approved amounts, note | `1ca6104` |
+| `rules/rule_engine.py` | Per-transaction rule orchestrator; reads all JSON files at import; routes labour vs expense; calls `apply_overrides()` after evaluation | `1ca6104` |
+| `rules/override_resolver.py` | Applies PL instructions (body-text regex for mixed-intent emails) and prior-exception patterns; handles Email 4's hold-release + markup-confirm in one message; guards clean items from incidental rejections | `1ca6104` |
+| `matching/currency.py` | `to_usd(amount, currency)` — FX conversion via configured spot rates; raises `ValueError` for unknown currencies | `1ca6104` |
+| `matching/matcher.py` | `reconcile()` — EXACT match via doc-id in note field; FUZZY match by date ±3 days + amount ±10%; computes SAP vs receipt delta after alcohol exclusion | `1ca6104` |
+| `main.py` | Phase 3 wired: `rule_engine.run(inputs)` then `reconcile(inputs, rule_results)` | `1ca6104` |
+
+### Rule evaluation — all 6 submissions (43 transactions)
+
+| Submission | Approved | Flagged | Rejected | Held→Approved |
+|------------|----------|---------|----------|---------------|
+| E-1041 (clean) | 5 | 2 | 0 | 0 |
+| E-2210 (over-cap/alcohol) | 5 | 0 | 2 | 0 |
+| E-3055 (hold/miscoded) | 3 | 2 | 1 | 1 |
+| E-4501 (principal cap) | 3 | 1 | 0 | 1 |
+| E-5102 (subcontractor) | 3 | 3 | 0 | 1 |
+| E-7702 (currency/personal) | 3 | 2 | 2 | 0 |
+
+### Rule precedence (implemented order, first match wins)
+
+1. **HOLD_ITEM** — SAP-flagged holds (stop immediately)
+2. **POLICY_VIOLATION** — alcohol / lounge / personal (hard reject, no override)
+3. **MISCODED_LABOUR** — non-billable time descriptions (hard reject)
+4. **RATE_MISMATCH / TRAVEL_TIME** — contracted rate, 50% travel rate, 8-hr cap (labour)
+5. **CURRENCY_MISMATCH** — non-USD receipt (flag for FX conversion)
+6. **SUBCONTRACTOR_MARKUP** — vendor invoice with markup not applied
+7. **OVER_CAP** — lodging / meal / per diem / mileage (runs before MISSING_BACKUP so cap violations surface even without a receipt in the store)
+8. **COMPOSITE_DOCUMENT / UNREADABLE_DOC** — doc quality issues
+9. **MISSING_BACKUP** — expense > $25 with no linked document (per diem and mileage exempt)
+10. **AMOUNT_MISMATCH** — SAP amount overbills receipt billable amount (>$0.50)
+11. **CLEAN** — no exception found
+
+### Override resolution design
+
+PL instructions are matched against each `RuleResult` using body-text regex (not just `instruction_type`) to handle mixed-intent emails. `_APPROVAL_RE`, `_REJECTION_RE`, `_HOLD_RELEASE_RE`, and `_MARKUP_CONFIRM_RE` patterns are checked independently. Key guards:
+
+- `ALCOHOL`, `AIRPORT_LOUNGE`, `PERSONAL_ITEM` rule_ids are never overrideable
+- Per diem items only rejected if body explicitly names "per diem"
+- Clean items not rejected by mixed-intent emails (email primarily approves something else)
+- `_amount_close()` within ±$1 prevents same-email approvals from blocking same-email rejections of different charges
 
 ---
 
@@ -136,9 +171,9 @@ Summary logged to: `output/billing_agent.log`
 
 | Test file | Status | Covers |
 |-----------|--------|--------|
-| `tests/test_rules.py` | ⏳ Pending Phase 3 | Each rule evaluation against known inputs |
-| `tests/test_matching.py` | ⏳ Pending Phase 3 | Doc-to-transaction linkage for all 12 complex cases |
-| `tests/test_currency.py` | ⏳ Pending Phase 3 | CAD→USD conversion for RC-015 |
+| `tests/test_rules.py` | ⏳ Pending | Each rule evaluation against known inputs |
+| `tests/test_matching.py` | ⏳ Pending | Doc-to-transaction linkage for all 12 complex cases |
+| `tests/test_currency.py` | ⏳ Pending | CAD→USD conversion for RC-015 |
 | `tests/test_invoice.py` | ⏳ Pending Phase 5 | End-to-end: 22 checkpoints against `expected-invoice.md` |
 
 ---
@@ -276,24 +311,20 @@ billing_agent/
 │   ├── doc_parser.py    ✅  load_documents(doc_ids) — filtered by note refs
 │   ├── email_parser.py  ✅  Parse sample-emails.md → ProjectInstruction list
 │   └── exception_loader.py ✅ Parse resolutions.csv → ExceptionCase list
-├── rules/               ✅  (Phase 2 — complete)
+├── rules/               ✅  (Phases 2 & 3 — complete)
 │   ├── data/
 │   │   ├── expense_caps.json    ✅ Auto-generated from contract (caps, rates, markup)
 │   │   ├── labour_rules.json    ✅ Auto-generated from contract (role rates, principal cap)
 │   │   ├── policy_rules.json    ✅ Auto-generated from contract (hard policy flags)
 │   │   └── keyword_lists.json   ✅ Manually maintained (detection word lists)
 │   ├── sync_rules.py        ✅ Parses contract → regenerates 3 JSON files; idempotent
-│   ├── models.py            ⏳ RuleResult dataclass (Phase 3)
-│   ├── rule_engine.py       ⏳ Orchestrator — returns List[RuleResult] (Phase 3)
-│   ├── contract_rules.py    ⏳ Alcohol, personal, receipt threshold (Phase 3)
-│   ├── cap_rules.py         ⏳ Lodging, meal, mileage, air class (Phase 3)
-│   ├── labour_rules.py      ⏳ Rate validation, miscoded, principal cap (Phase 3)
-│   ├── subcontractor_rules.py ⏳ 8% markup check (Phase 3)
-│   └── override_resolver.py ⏳ PL instruction + historical pattern lookup (Phase 3)
-├── matching/            ⏳  (Phase 3)
-│   ├── matcher.py            Link transactions → documents
-│   ├── id_normalizer.py      Resolve employee/vendor IDs across sources
-│   └── currency.py           FX conversion (CAD → USD at receipt date)
+│   ├── models.py            ✅ RuleResult dataclass
+│   ├── rule_engine.py       ✅ Orchestrator — evaluates all rules, returns List[RuleResult]
+│   └── override_resolver.py ✅ PL instruction + prior-exception pattern application
+├── matching/            ✅  (Phase 3 — complete)
+│   ├── __init__.py           Re-exports MatchResult, reconcile
+│   ├── matcher.py            ✅ EXACT/FUZZY document matching; FX delta computation
+│   └── currency.py           ✅ FX conversion (spot rates from config)
 ├── exceptions/          ⏳  (Phase 4)
 │   ├── detector.py           Identify all exception types
 │   └── resolver.py           Apply PL overrides & historical patterns

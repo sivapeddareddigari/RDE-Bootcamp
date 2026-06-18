@@ -1,7 +1,7 @@
 # Execution Flow: Agentic Billing Review System
 
 **Project:** Meridian Atlas Partners — Coastal Greenway (PRJ-NS-7421)  
-**Last updated:** 2026-06-18 (Phase 2 complete)
+**Last updated:** 2026-06-18 (Phase 3 complete)
 
 This document describes what happens step-by-step when a submission file enters the system, how each phase transforms the data, and what flows into the next phase.
 
@@ -74,8 +74,8 @@ _handle(submission)
   ├─► process_submission(processing_path)
   │     ├─► run_logger.init_run(filename)        open log section in billing_agent.log
   │     ├─► [Phase 1]  load_inputs()
-  │     ├─► [Phase 2]  rule_engine.run()          ← stub today
-  │     ├─► [Phase 3]  matcher.reconcile()        ← stub today
+  │     ├─► [Phase 2/3]  rule_engine.run()         ← wired
+  │     ├─► [Phase 3]  matcher.reconcile()        ← wired
   │     ├─► [Phase 4]  detector.run()             ← stub today
   │     ├─► [Phase 5]  invoice_builder.build()    ← stub today
   │     └─► [Phase 6]  supervisor.run()           ← stub today
@@ -190,10 +190,10 @@ IngestionResult
 | `.githooks/pre-commit` | On `git commit` when `contract-001.md` is staged | Runs `sync_rules.py`, stages updated JSON files |
 | `.claude/settings.json` PostToolUse | When `contract-001.md` is edited in a Claude Code session | Runs `sync_rules.py` immediately after save |
 
-### Rule evaluation execution (wired in Phase 3)
+### Rule evaluation execution
 
 ```
-rule_engine.run(inputs)                       ← planned; reads built JSON files
+rule_engine.run(inputs)                       ← reads built JSON files at import
   │
   ├─► load JSON rule files once at import time
   │
@@ -255,44 +255,47 @@ rule_engine.run(inputs)                       ← planned; reads built JSON file
 
 ---
 
-## Phase 3 — Matching & Reconciliation  *(not yet built)*
+## Phase 3 — Matching & Reconciliation  ✅ Complete
 
-**Entry point:** `matcher.reconcile(inputs, rule_results)` in `billing_agent/matching/matcher.py`  
+**Entry point:** `reconcile(inputs, rule_results)` in `billing_agent/matching/matcher.py`  
 **Input:** `IngestionResult` + `List[RuleResult]` from Phase 2  
-**Output:** `List[MatchResult]` — each transaction paired with its document and reconciliation status
+**Output:** `List[MatchResult]` — each expense transaction paired with its document and reconciliation delta
 
-### Execution steps (planned)
+### Execution steps
 
 ```
-matcher.reconcile(inputs, rule_results)
+reconcile(inputs, rule_results)
   │
-  └─► for each tx in inputs.transactions:
+  └─► for each expense tx in inputs.transactions:
         │
         ├─1─ direct match
-        │      doc_id extracted from tx.note → lookup in inputs.documents
+        │      _DOC_ID_RE regex over tx.note → e.g. "RC-003" → lookup in docs_by_id
         │      → MatchResult(confidence=EXACT)
         │
         ├─2─ fuzzy match (if no direct match)
         │      candidate docs = documents within ±3-day date window
-        │      score by amount proximity (±10%) and vendor name similarity
-        │      → MatchResult(confidence=PROBABLE or NO_MATCH)
+        │      score by amount proximity: |doc_usd − tx.amount| / max < 10%
+        │      return single candidate only (ambiguous → NO_MATCH)
+        │      → MatchResult(confidence=FUZZY)
         │
-        ├─3─ special cases
-        │      COMPOSITE_DOCUMENT   split doc line items → match each to a tx
-        │      CURRENCY_MISMATCH    convert doc.total_amount using FX_RATES[doc.currency]
-        │                           → USD equivalent for amount_mismatch check
-        │      UNREADABLE           matched_doc = None → carries MISSING_BACKUP forward
+        ├─3─ no match
+        │      → MatchResult(confidence=NO_MATCH, usd_amount=tx.amount, delta=0.0)
         │
-        └─4─ reconcile amounts
-               approved_amount from Phase 2 (alcohol excluded, markup added, FX converted)
-               vs tx.amount in SAP
-               → confirm or update AMOUNT_MISMATCH flag
+        └─4─ build result (EXACT or FUZZY)
+               to_usd(doc.total_amount, doc.currency) → applies FX_RATES if non-USD
+               doc_billable = usd_amount − doc.alcohol_amount
+               amount_delta = tx.amount − doc_billable
+               (positive = SAP higher than receipt; negative = line-item of larger folio)
 
   returns List[MatchResult]{
     transaction_id, matched_doc_id, confidence,
-    reconciled_amount, fx_rate_applied, notes
+    usd_amount, fx_rate_applied, amount_delta, note
   }
 ```
+
+**FX conversion** (`billing_agent/matching/currency.py`): `to_usd(amount, currency)` applies `FX_RATES` from `config.py`. Raises `ValueError` for unknown currencies.
+
+**Alcohol exclusion:** `doc_billable = doc.total_amount − doc.alcohol_amount` is used in the delta computation. The amount mismatch rule in Phase 2 also uses this to only flag overbilling direction (tx.amount > doc_billable + $0.50).
 
 ---
 
