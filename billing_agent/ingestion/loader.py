@@ -13,7 +13,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List
+from typing import List, Set
 
 from billing_agent.config import DATA_DIR
 from billing_agent import run_logger
@@ -79,6 +79,17 @@ class IngestionResult:
         )
 
 
+_DOC_ID_RE = re.compile(r"\b((?:RC|ML|VI)-\d{3})\b")
+
+
+def _referenced_doc_ids(transactions: List[Transaction]) -> Set[str]:
+    """Collect every document ID mentioned in transaction note fields."""
+    ids: Set[str] = set()
+    for tx in transactions:
+        ids.update(_DOC_ID_RE.findall(tx.note))
+    return ids
+
+
 def _resolve_timecard_path(submission_path: Path) -> Path:
     """Derive the timecard path from the cycle embedded in the submission filename."""
     m = re.search(r"(\d{4}-\d{2})", submission_path.stem)
@@ -111,14 +122,22 @@ def load_inputs(submission_path: Path) -> IngestionResult:
         f"({labour_count} labour, {expense_count} expense, {held_count} held)"
     )
 
+    employee_ids = {tx.employee_id for tx in transactions if tx.employee_id}
+    doc_ids      = _referenced_doc_ids(transactions)
+    run_logger.step(
+        f"Scope: {len(employee_ids)} employee(s) {sorted(employee_ids)}, "
+        f"{len(doc_ids)} referenced document(s) {sorted(doc_ids)}",
+        "info",
+    )
+
     timecard_path = _resolve_timecard_path(submission_path)
-    timecards = load_timecards(timecard_path)
-    run_logger.step(f"Loaded {len(timecards)} timecard entries")
+    timecards = load_timecards(timecard_path, employee_ids=employee_ids)
+    run_logger.step(f"Loaded {len(timecards)} timecard entries for submission employees")
 
     rates, clauses = load_contract(_CONTRACT_PATH)
     run_logger.step(f"Loaded contract — {len(rates)} role rates, {len(clauses)} expense clauses")
 
-    documents = load_documents(_DOCS_DIR)
+    documents = load_documents(_DOCS_DIR, doc_ids=doc_ids if doc_ids else None)
     composite = sum(d.is_composite for d in documents)
     unreadable = sum(d.is_unreadable for d in documents)
     alcohol = sum(d.has_alcohol for d in documents)

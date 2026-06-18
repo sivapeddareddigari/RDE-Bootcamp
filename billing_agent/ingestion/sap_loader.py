@@ -17,7 +17,7 @@ import csv
 import logging
 from datetime import date
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Optional, Set, Tuple
 
 from billing_agent.models.transaction import TimecardEntry, Transaction
 
@@ -54,11 +54,15 @@ def load_transactions(csv_path: Path) -> List[Transaction]:
     return transactions
 
 
-def load_timecards(csv_path: Path) -> List[TimecardEntry]:
+def load_timecards(csv_path: Path, employee_ids: Optional[Set[str]] = None) -> List[TimecardEntry]:
     timecards: List[TimecardEntry] = []
+    skipped = 0
     with csv_path.open(newline="", encoding="utf-8") as fh:
         for row in csv.DictReader(fh):
             try:
+                if employee_ids is not None and row["employee_id"].strip() not in employee_ids:
+                    skipped += 1
+                    continue
                 raw_approval = row.get("approval_date", "").strip()
                 timecards.append(TimecardEntry(
                     timecard_id          = row["timecard_id"].strip(),
@@ -80,6 +84,8 @@ def load_timecards(csv_path: Path) -> List[TimecardEntry]:
                 ))
             except (KeyError, ValueError) as exc:
                 log.warning("Skipping malformed timecard row %s: %s", row.get("timecard_id"), exc)
+    if skipped:
+        log.info("Skipped %d timecard rows for employees not in submission", skipped)
     log.info("Loaded %d timecard entries from %s", len(timecards), csv_path.name)
     return timecards
 

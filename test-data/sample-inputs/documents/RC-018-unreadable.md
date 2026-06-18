@@ -1,6 +1,6 @@
 # Document
 
-> Image quality on this scan is very poor. Submitted with no clear merchant, date, or amount.
+> This document is unreadable — scan quality too poor to extract merchant, date, or amount.
 
 ```
 ┌──────────────────────────────────────┐

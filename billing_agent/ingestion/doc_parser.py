@@ -22,7 +22,7 @@ import logging
 import re
 from datetime import date
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Set
 
 from billing_agent.models.document import LineItem, ReceiptDocument
 
@@ -39,16 +39,28 @@ _TOTAL    = re.compile(r"TOTAL[^\d]*([\d,]+\.\d{2})", re.IGNORECASE)
 _CURRENCY = re.compile(r"\b(CAD|EUR|GBP|AUD|JPY|CHF|MXN|SEK|NOK|DKK)\b")
 
 
-def load_documents(docs_dir: Path) -> List[ReceiptDocument]:
+def load_documents(docs_dir: Path, doc_ids: Optional[Set[str]] = None) -> List[ReceiptDocument]:
     docs: List[ReceiptDocument] = []
+    skipped = 0
     for md_file in sorted(docs_dir.glob("*.md")):
         if md_file.name.lower() == "readme.md":
+            continue
+        if doc_ids is not None and _file_doc_id(md_file.stem) not in doc_ids:
+            skipped += 1
             continue
         doc = _parse_document(md_file)
         if doc:
             docs.append(doc)
+    if skipped:
+        log.info("Skipped %d documents not referenced by this submission", skipped)
     log.info("Loaded %d documents from %s", len(docs), docs_dir)
     return docs
+
+
+def _file_doc_id(stem: str) -> str:
+    """Extract the doc ID prefix from a filename stem (e.g. 'RC-003-hotel-folio' → 'RC-003')."""
+    parts = stem.split("-")
+    return f"{parts[0]}-{parts[1]}" if len(parts) >= 2 else stem
 
 
 def _parse_document(md_path: Path) -> Optional[ReceiptDocument]:
