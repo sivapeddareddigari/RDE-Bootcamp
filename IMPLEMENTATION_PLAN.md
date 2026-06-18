@@ -191,46 +191,68 @@ An item is blocking (prevents appearance on draft invoice) when its `rule_id` is
 
 ---
 
-## Phase 5 — Completed
+## Phase 5 — Completed (redesigned)
+
+Phase 5 was redesigned to reflect how the real billing workflow operates: invoice generation is a SAP month-end activity, not a per-submission step. The pipeline now has two distinct triggers.
+
+### Architecture — two triggers
+
+| Trigger | When | Command | Output |
+|---------|------|---------|--------|
+| **Watcher** (per-submission) | Drop-folder CSV arrives | auto | Employee notices + analyst summary |
+| **Invoice CLI** (month-end) | All submissions in for the month | `python3 -m billing_agent.invoice_run --project PRJ-NS-7421 --month 2026-04` | Draft invoice + exceptions report + audit trail |
 
 ### What was built
 
 | Module | Description |
 |--------|-------------|
-| `output/__init__.py` | Package re-exports — `BuildResult`, `build` |
-| `output/invoice_builder.py` | `build()` entry point; writes three timestamped output files per submission; `_validate()` asserts no hard-reject item is billed and `grand_total == labour + expenses` |
+| `data/contacts.json` | Contact directory — employee name/email/role, billing analyst, project lead per project |
+| `ingestion/contacts_loader.py` | `load_contacts()` → `ContactDirectory`; `.employee(id)` and `.project_lead(project_id)` lookups |
+| `output/notice_writer.py` | Per-submission: writes per-employee exception notices + analyst summary |
+| `output/invoice_builder.py` | Project-level month-end: re-reads all completed CSVs for project+month, re-runs Phases 1–4, aggregates into one invoice |
+| `output/__init__.py` | Package re-exports — `BuildResult`, `build`, `write_notices` |
+| `invoice_run.py` | CLI entry point for month-end invoice trigger |
+| `main.py` (updated) | Phase 5 now calls `write_notices()` instead of `build()`; `_contacts` loaded once at startup |
 
-### Three output files per submission run
+### Per-submission output files (watcher trigger)
 
 | File | Format | Contents |
 |------|--------|----------|
-| `output/draft-invoice-{stem}__{ts}.md` | Markdown | Section A (labour table), Section B (expenses by category), Totals, Excluded/Blocked items list |
-| `output/audit-trail-{stem}__{ts}.csv` | CSV | One row per transaction: `transaction_id, employee_id, type, description, original_amount, approved_amount, status, rule_id, exception_type, override_applied, override_source, matched_doc_id, match_confidence, amount_delta, note` |
-| `output/exceptions-report-{stem}__{ts}.md` | Markdown | Auto-resolved, PL rejections, hard rejections, escalate-analyst, escalate-employee, escalate-PL sections |
+| `output/notices/exception-notice-{emp_id}-{stem}__{ts}.md` | Markdown | Addressed to employee by name; splits items into "Blocking" (must fix in SAP) and "Under review" tables; each item has plain-English corrective action |
+| `output/analyst-summary-{stem}__{ts}.md` | Markdown | Addressed to billing analyst; headline counts table; blocking items, escalation sections, auto-resolved items |
+
+### Project-level output files (invoice CLI — no timestamp, one canonical file per project+month)
+
+| File | Format | Contents |
+|------|--------|----------|
+| `output/draft-invoice-{project}-{month}.md` | Markdown | Section A (labour with Employee column), Section B (expenses by category), Totals, Excluded/Blocked items |
+| `output/audit-trail-{project}-{month}.csv` | CSV | 17 columns including `submission` and `employee_name`; one row per transaction across all submissions |
+| `output/exceptions-report-{project}-{month}.md` | Markdown | Project-wide exception summary — auto-resolved, rejections, escalations with employee names |
 
 ### Key design decisions
 
-- **Single source of truth:** `build()` consumes `approved_amount` from `RuleResult` — no rule logic is re-applied.
+- **Re-process from `completed/`:** Invoice build re-runs Phases 1–4 on each completed submission CSV rather than persisting intermediate results. Idempotent and catches any rule changes between submission and month-end.
+- **One invoice per project per month:** `_find_submissions()` collects all CSVs in `completed/` whose name contains `billing_month`. A single canonical file is written — re-running overwrites the prior draft.
+- **Contacts config:** All email addresses and role labels maintained in `data/contacts.json`. Employee and analyst contacts are resolved by `ContactDirectory` in both notice_writer and invoice_builder.
 - **No hard-coding:** `_MARKUP_PCT` and `_MEAL_KWS` loaded from JSON at import (same source as rule engine).
 - **Subcontractor split:** when `_has_markup()` is True (override_applied + approved > original), the invoice shows two rows — cost line + markup line.
-- **Expense categories:** `_categorize()` maps each transaction to `AIR / LODGING / MEALS / GROUND / MILEAGE / SUBCONTRACTOR / OTHER` for grouped Section B display.
 
-### Invoice output — all 6 submissions
+### Project-level aggregation — all 6 submissions combined
 
-| Submission | Labour (USD) | Expenses (USD) | Total (USD) | Blocked |
-|------------|-------------|----------------|-------------|---------|
-| E-1041 clean | 2,800.00 | 365.54 | 3,165.54 | 1 |
-| E-2210 over-cap/alcohol | 3,335.00 | 493.00 | 3,828.00 | 0 |
-| E-3055 hold/miscoded | 430.00 | 18.00 | 448.00 | 2 |
-| E-4501 principal cap | 1,920.00 | 485.00 | 2,405.00 | 1 |
-| E-5102 subcontractor | 2,030.00 | 2,400.00 | 4,430.00 | 3 |
-| E-7702 currency/personal | 0.00 | 375.00 | 375.00 | 2 |
+| Metric | Value |
+|--------|-------|
+| Submissions processed | 6 |
+| Labour total | $10,515.00 |
+| Expense total | $4,136.54 |
+| Grand total | $14,651.54 |
+| Blocked items | 9 |
+| Audit trail rows | 36 |
 
 ---
 
 ## Phase 7 — Testing (In Progress)
 
-### Unit tests — 231 tests, all passing
+### Unit tests — 215 tests, all passing
 
 Run with: `python3 run_tests.py`  
 Results saved to: `output/Unit_test_runs/unit_test_run_<timestamp>.txt`  
@@ -242,7 +264,7 @@ Summary logged to: `output/billing_agent.log`
 | `tests/test_doc_parser.py` | 25 | Document ID filtering; composite/unreadable/alcohol/currency/type detection; line item extraction |
 | `tests/test_loader.py` | 34 | `_referenced_doc_ids` helper; timecard scoping per submission; document scoping; static data always loaded |
 | `tests/test_sync_rules.py` | 79 | JSON file existence and validity; all rule values from contract; builder functions with modified contract text; keyword list content; sync idempotency |
-| `tests/test_invoice_builder.py` | 71 | Full pipeline totals for all 6 submissions; output file creation; audit trail row count and headers; ALCOHOL/PERSONAL_ITEM/AIRPORT_LOUNGE approved_amount==0; exceptions routing; invoice/exceptions markdown content; `_categorize`, `_has_markup`, `_infer_cycle` helpers |
+| `tests/test_invoice_builder.py` | 55 | `ContactsLoader` (6 tests) — load + lookup helpers; `NoticeWriter` (12 tests) — employee notices, analyst summary content; `InvoiceBuild` (19 tests) — project-level aggregation, audit trail, invoice/exceptions content; `_categorize`, `_has_markup`, `_infer_cycle` helpers (18 tests) |
 
 ### Remaining test work (Phase 7 completion)
 
@@ -410,9 +432,13 @@ billing_agent/
 ├── agents/              ⏳  (Phase 6)
 │   ├── supervisor.py         LLM agent — orchestrates pipeline sequence
 │   └── exception_agent.py    LLM agent — pattern lookup + novel case routing
+├── data/                ✅  (Phase 5 — complete)
+│   └── contacts.json         ✅ Contact directory — employees, billing analysts, project leads
+├── invoice_run.py       ✅  (Phase 5) Month-end CLI: --project + --month args
 └── output/              ✅  (Phase 5 — complete)
-    ├── __init__.py           ✅ Re-exports BuildResult, build
-    └── invoice_builder.py    ✅ Draft invoice (md), audit trail (csv), exceptions report (md)
+    ├── __init__.py           ✅ Re-exports BuildResult, build, write_notices
+    ├── notice_writer.py      ✅ Per-submission: employee notices + analyst summary
+    └── invoice_builder.py    ✅ Project-level month-end: draft invoice, audit trail, exceptions report
 
 tests/                   🔄  (Phase 7 — in progress)
 ├── conftest.py          ✅  Shared paths and submission fixture constants
@@ -420,7 +446,7 @@ tests/                   🔄  (Phase 7 — in progress)
 ├── test_doc_parser.py   ✅  25 tests — document parsing and filtering
 ├── test_loader.py       ✅  34 tests — scoped IngestionResult
 ├── test_sync_rules.py   ✅  79 tests — rule JSON values, sync, keyword lists, idempotency
-├── test_invoice_builder.py ✅ 71 tests — Phase 5 invoice builder (totals, files, content, helpers)
+├── test_invoice_builder.py ✅ 55 tests — contacts loader, notice writer, project-level invoice builder, helpers
 ├── test_rules.py        ⏳  Rule evaluation against known inputs (pending)
 ├── test_matching.py     ⏳  Doc-to-transaction linkage (pending)
 └── test_currency.py     ⏳  CAD→USD conversion (pending)
@@ -447,6 +473,11 @@ test-data/sample-inputs/
 
 output/
 ├── billing_agent.log                 Append-mode run log (all submissions + test runs)
+├── notices/                          Per-employee exception notices (one per affected employee per submission)
+├── analyst-summary-{stem}__{ts}.md  Per-submission analyst summary
+├── draft-invoice-{project}-{month}.md  Month-end project invoice (overwritten on re-run)
+├── audit-trail-{project}-{month}.csv   36-column audit trail across all submissions
+├── exceptions-report-{project}-{month}.md  Project-wide exception summary
 └── Unit_test_runs/                   Timestamped test result files (one per run)
 ```
 

@@ -3,7 +3,7 @@
 **Project:** Meridian Atlas Partners — RDE Bootcamp  
 **Repo:** https://github.com/sivapeddareddigari/RDE-Bootcamp  
 **Active branch:** `develop`  
-**Last updated:** 2026-06-18 (Phase 5 complete)
+**Last updated:** 2026-06-18 (Phase 5 redesign complete)
 
 ---
 
@@ -21,6 +21,9 @@ python3 -m billing_agent.main
 # Drop a submission to trigger a run (second terminal)
 cp test-data/sample-inputs/submissions/submission-E1041-clean-2026-04.csv submissions/incoming/
 
+# Generate month-end project invoice
+python3 -m billing_agent.invoice_run --project PRJ-NS-7421 --month 2026-04
+
 # Run tests
 python3 -m pytest tests/ -v
 ```
@@ -36,11 +39,49 @@ python3 -m pytest tests/ -v
 | Phase 2 | Rule infrastructure & contract sync | ✅ Done | `6ea7ba5` |
 | Phase 3 | Rule engine, document matching, override resolution | ✅ Done | `1ca6104` |
 | Phase 4 | Exception detection & triage | ✅ Done | `65c3366` |
-| Phase 5 | Invoice builder & outputs | ✅ Done | `9800e78` |
+| Phase 5 | Employee notices + analyst summary (per-submission) + project invoice (month-end CLI) | ✅ Done | HEAD |
 | Phase 6 | Agentic orchestration (Claude API) | ⏳ Next | — |
-| Phase 7 | Testing | 🔄 In progress | `9800e78` |
+| Phase 7 | Testing | 🔄 In progress | HEAD |
 
-**Test suite:** 231 tests, all passing. Run: `python3 -m pytest tests/ -v`
+**Test suite:** 215 tests, all passing. Run: `python3 -m pytest tests/ -v`
+
+---
+
+## Phase 5 Architecture — Two Triggers
+
+Phase 5 was redesigned to reflect how the real billing workflow operates. Invoice generation is a SAP month-end activity, not a per-submission step.
+
+### Trigger 1 — Watcher (per-submission, fires automatically)
+
+Every CSV dropped into `submissions/incoming/` runs Phases 1–4 then:
+- Writes a per-employee exception notice for each affected employee  
+  (`output/notices/exception-notice-{emp_id}-{stem}__{ts}.md`)
+- Writes an analyst summary for the billing analyst  
+  (`output/analyst-summary-{stem}__{ts}.md`)
+- Employee notices split items into "Blocking" (must fix in SAP) vs "Under review"
+- Each item has plain-English corrective action instructions (`_ACTION` dict)
+
+### Trigger 2 — Month-end invoice CLI
+
+```bash
+python3 -m billing_agent.invoice_run --project PRJ-NS-7421 --month 2026-04
+```
+
+Re-reads all completed submission CSVs for the project+month, re-runs Phases 1–4 for each, aggregates into:
+- `output/draft-invoice-PRJ-NS-7421-2026-04.md` — one canonical invoice
+- `output/audit-trail-PRJ-NS-7421-2026-04.csv` — 36 rows, 17 columns (incl. `employee_name`)
+- `output/exceptions-report-PRJ-NS-7421-2026-04.md` — project-wide exception summary
+
+**Key design:** re-process from `completed/` (idempotent, catches rule changes between submission and month-end).
+
+### Project-level results — all 6 submissions combined
+
+| Metric | Value |
+|--------|-------|
+| Labour total | $10,515.00 |
+| Expense total | $4,136.54 |
+| Grand total | $14,651.54 |
+| Blocked items | 9 |
 
 ---
 
@@ -50,7 +91,8 @@ python3 -m pytest tests/ -v
 billing_agent/
 ├── __init__.py
 ├── config.py                   # paths, FX_RATES (only contract value here), watcher config
-├── main.py                     # drop-folder watcher; Phases 1–5 wired; Phase 6 TODO stub
+├── main.py                     # drop-folder watcher; Phases 1–5a wired; Phase 6 TODO stub
+├── invoice_run.py              # month-end CLI — --project + --month args
 ├── run_logger.py               # append-mode output/billing_agent.log
 ├── models/
 │   ├── transaction.py          # Transaction, TimecardEntry dataclasses
@@ -63,7 +105,10 @@ billing_agent/
 │   ├── contract_parser.py      # parses contract-001.md → rates + clauses
 │   ├── doc_parser.py           # parses RC-*/ML-*/VI-* markdown docs (scoped by doc_id)
 │   ├── email_parser.py         # parses sample-emails.md → List[ProjectInstruction]
-│   └── exception_loader.py    # parses resolutions.csv → List[ExceptionCase]
+│   ├── exception_loader.py    # parses resolutions.csv → List[ExceptionCase]
+│   └── contacts_loader.py      # load_contacts() → ContactDirectory
+├── data/
+│   └── contacts.json           # employee/analyst/PL contact directory
 ├── rules/
 │   ├── data/
 │   │   ├── expense_caps.json   # auto-generated from contract — caps, rates, markup
@@ -84,8 +129,9 @@ billing_agent/
 │   ├── models.py               # ExceptionItem, ExceptionReport dataclasses
 │   └── detector.py             # run() → ExceptionReport
 └── output/
-    ├── __init__.py             # re-exports BuildResult, build
-    └── invoice_builder.py      # build() → three timestamped files per submission
+    ├── __init__.py             # re-exports BuildResult, build, write_notices
+    ├── notice_writer.py        # write_notices() → employee notices + analyst summary
+    └── invoice_builder.py      # build() → project-level invoice + audit + exceptions
 
 tests/
 ├── conftest.py                 # shared paths and submission fixture constants
@@ -93,7 +139,7 @@ tests/
 ├── test_doc_parser.py          # 25 tests
 ├── test_loader.py              # 34 tests
 ├── test_sync_rules.py          # 79 tests
-└── test_invoice_builder.py     # 71 tests
+└── test_invoice_builder.py     # 55 tests (contacts loader, notice writer, invoice builder, helpers)
 
 test-data/sample-inputs/
 ├── submissions/                # 6 per-employee scenario CSVs
@@ -127,8 +173,7 @@ class IngestionResult:
     instructions:   List[ProjectInstruction]
     exceptions:     List[ExceptionCase]
     loaded_at:      datetime
-    # computed properties:
-    # .labour_transactions, .expense_transactions, .held_transactions
+    # computed: .labour_transactions, .expense_transactions, .held_transactions
 ```
 
 ### RuleResult (Phase 3 output — one per transaction)
@@ -141,68 +186,54 @@ class RuleResult:
     rule_id:         str          # CLEAN | ALCOHOL | LODGING_CAP | NO_RECEIPT | …
     override_applied: bool
     override_source: str          # e.g. "PL-EMAIL-03"
-    original_amount: float        # tx.amount
-    approved_amount: float        # after rule adjustment
-    note:            str
-```
-
-### MatchResult (Phase 3 output — one per expense transaction)
-```python
-@dataclass
-class MatchResult:
-    transaction_id: str
-    matched_doc_id: str           # "" if NO_MATCH
-    confidence:     str           # EXACT | FUZZY | NO_MATCH
-    usd_amount:     float         # doc amount converted to USD
-    fx_rate_applied: float        # 1.0 for USD docs
-    amount_delta:   float         # tx.amount − doc_billable (positive = SAP overbills)
-    note:           str
-```
-
-### ExceptionItem / ExceptionReport (Phase 4 output)
-```python
-@dataclass
-class ExceptionItem:
-    transaction_id: str
-    employee_id:    str
-    description:    str
     original_amount: float
     approved_amount: float
-    status:          str          # FLAG | REJECT | HOLD
-    exception_type:  Optional[str]
-    rule_id:         str
-    routing:         str          # ANALYST | EMPLOYEE | PL | AUTO_RESOLVED
-    override_applied: bool
-    override_source: str
     note:            str
-    blocks_invoice:  bool
+```
 
+### ExceptionReport (Phase 4 output)
+```python
 @dataclass
 class ExceptionReport:
     submission_file:    str
     generated_at:       str
     total_transactions: int
     clean_count:        int
-    auto_resolved:      List[ExceptionItem]   # FLAG/HOLD → APPROVE via override
-    pl_rejections:      List[ExceptionItem]   # APPROVE → REJECT via PL instruction
-    hard_rejections:    List[ExceptionItem]   # REJECT from contract rule
+    auto_resolved:      List[ExceptionItem]
+    pl_rejections:      List[ExceptionItem]
+    hard_rejections:    List[ExceptionItem]
     escalate_analyst:   List[ExceptionItem]
     escalate_employee:  List[ExceptionItem]
     escalate_pl:        List[ExceptionItem]
     # computed: .blocking, .unresolved_count, .exception_count
 ```
 
-### BuildResult (Phase 5 output)
+### BuildResult (Phase 5b output — project invoice)
 ```python
 @dataclass
 class BuildResult:
-    invoice_path:    Path    # output/draft-invoice-{stem}__{ts}.md
-    audit_path:      Path    # output/audit-trail-{stem}__{ts}.csv
-    exceptions_path: Path    # output/exceptions-report-{stem}__{ts}.md
+    project_id:      str
+    billing_month:   str
+    invoice_path:    Path    # output/draft-invoice-{project}-{month}.md
+    audit_path:      Path    # output/audit-trail-{project}-{month}.csv
+    exceptions_path: Path    # output/exceptions-report-{project}-{month}.md
     labour_total:    float
     expense_total:   float
     grand_total:     float
-    blocked_count:   int     # len(exception_report.blocking)
+    blocked_count:   int
+    submission_count: int
+```
+
+### ContactDirectory (Phase 5 — contacts)
+```python
+@dataclass
+class ContactDirectory:
+    employees:       List[EmployeeContact]      # from data/contacts.json
+    billing_analysts: List[AnalystContact]
+    project_leads:   List[ProjectLeadContact]
+
+    def employee(self, employee_id) -> Optional[EmployeeContact]: ...
+    def project_lead(self, project_id) -> Optional[ProjectLeadContact]: ...
 ```
 
 ---
@@ -213,69 +244,33 @@ class BuildResult:
 1. `HOLD_ITEM` — SAP hold flag → stop immediately
 2. `POLICY_VIOLATION` — ALCOHOL / AIRPORT_LOUNGE / PERSONAL_ITEM → hard REJECT, approved=0
 3. `MISCODED_LABOUR` — non-billable descriptions → hard REJECT
-4. `RATE_MISMATCH / TRAVEL_TIME` — labour only (contracted rate, 50% travel rate, 8hr cap)
+4. `RATE_MISMATCH / TRAVEL_TIME` — labour only
 5. `CURRENCY_MISMATCH` — non-USD receipt → FLAG
 6. `SUBCONTRACTOR_MARKUP` — vendor invoice with markup not applied → FLAG, approved=cost×1.08
-7. **`OVER_CAP`** — lodging/meal/per diem/mileage caps → FLAG *(runs BEFORE MISSING_BACKUP — critical: cap violations surface even when receipt not in store)*
-8. `COMPOSITE_DOCUMENT / UNREADABLE_DOC` — doc quality → FLAG
-9. `MISSING_BACKUP` — >$25 with no linked doc → FLAG (per diem and mileage exempt)
-10. `AMOUNT_MISMATCH` — SAP overbills receipt by >$0.50 → FLAG
-11. `CLEAN` — no exception
-
-### All rule values come from JSON, never config.py
-- `rules/data/expense_caps.json` — lodging, meal, per diem, mileage, markup, receipt threshold
-- `rules/data/labour_rules.json` — role rates, principal cap %, travel rate & hours cap
-- `rules/data/keyword_lists.json` — alcohol, personal_items, miscoded_labour, airport_lounge, meals
-- `config.py` only has `FX_RATES` (operational, not contractual)
+7. **`OVER_CAP`** — lodging/meal/per diem/mileage caps → FLAG *(runs BEFORE MISSING_BACKUP)*
+8. `COMPOSITE_DOCUMENT / UNREADABLE_DOC`
+9. `MISSING_BACKUP` — >$25 with no linked doc (per diem and mileage exempt)
+10. `AMOUNT_MISMATCH` — SAP overbills receipt by >$0.50
+11. `CLEAN`
 
 ### Override resolver design
-- Uses body-text regex (`_HOLD_RELEASE_RE`, `_MARKUP_CONFIRM_RE`, `_APPROVAL_RE`, `_REJECTION_RE`)  
-  **not** just `instruction_type` — handles mixed-intent emails
-- `ALCOHOL`, `AIRPORT_LOUNGE`, `PERSONAL_ITEM` rule_ids are **never** overrideable
-- Guard: don't reject a CLEAN item from a mixed-intent email (rejection language targets a different charge)
-- `_amount_close()`: ±$1.00 tolerance on instruction amount vs original_amount
+- Body-text regex (`_HOLD_RELEASE_RE`, `_MARKUP_CONFIRM_RE`, `_APPROVAL_RE`, `_REJECTION_RE`)
+- ALCOHOL / AIRPORT_LOUNGE / PERSONAL_ITEM are **never** overrideable
+- Guard: don't reject a CLEAN item from a mixed-intent email
 
 ---
 
-## Exception Routing Tables
+## Exception Routing
 
-### Routing (rule_id → actor)
 | Actor | Rule IDs |
 |-------|----------|
 | ANALYST | RATE_MISMATCH, TRAVEL_RATE, TRAVEL_HRS_CAP, MILEAGE_RATE, CURRENCY, COMPOSITE_DOC, MARKUP_MISSING, AMOUNT_MISMATCH |
 | PL | LODGING_CAP, MEAL_CAP, PER_DIEM_CAP, HOLD_ITEM |
 | EMPLOYEE | NO_RECEIPT, UNREADABLE_DOC, MISCODED, ALCOHOL, AIRPORT_LOUNGE, PERSONAL_ITEM |
 
-### Blocking flag (prevents appearance on draft invoice)
-`LODGING_CAP`, `MEAL_CAP`, `PER_DIEM_CAP`, `HOLD_ITEM`, `NO_RECEIPT`, `UNREADABLE_DOC`, `CURRENCY`, `MARKUP_MISSING`
+**Blocking rules:** `LODGING_CAP`, `MEAL_CAP`, `PER_DIEM_CAP`, `HOLD_ITEM`, `NO_RECEIPT`, `UNREADABLE_DOC`, `CURRENCY`, `MARKUP_MISSING`
 
-`AMOUNT_MISMATCH` is **not** blocking — analyst approves the receipt amount while SAP discrepancy is investigated.
-
----
-
-## Phase 5 Output — Invoice Builder
-
-### Three files per run (timestamped to same second)
-| File | Contents |
-|------|----------|
-| `draft-invoice-{stem}__{ts}.md` | Section A (labour table), Section B (expenses by category: AIR/LODGING/MEALS/GROUND/MILEAGE/SUBCONTRACTOR/OTHER), Totals, Excluded/Blocked list |
-| `audit-trail-{stem}__{ts}.csv` | One row per transaction — 15 fields including rule_id, override_source, matched_doc_id, amount_delta |
-| `exceptions-report-{stem}__{ts}.md` | Six sections (auto-resolved, PL rejections, hard rejections, escalate-analyst, escalate-employee, escalate-PL); blocking items marked ⚠ BLOCKS |
-
-### Smoke test results — all 6 submissions
-| Submission | Labour | Expenses | Total | Blocked |
-|------------|--------|---------|-------|---------|
-| E-1041 clean | 2,800.00 | 365.54 | 3,165.54 | 1 |
-| E-2210 over-cap/alcohol | 3,335.00 | 493.00 | 3,828.00 | 0 |
-| E-3055 hold/miscoded | 430.00 | 18.00 | 448.00 | 2 |
-| E-4501 principal cap | 1,920.00 | 485.00 | 2,405.00 | 1 |
-| E-5102 subcontractor | 2,030.00 | 2,400.00 | 4,430.00 | 3 |
-| E-7702 currency/personal | 0.00 | 375.00 | 375.00 | 2 |
-
-### Key helpers
-- `_categorize(tx)` — maps tx to expense category from description/unit keywords
-- `_has_markup(r)` — True when SUBCONTRACTOR_MARKUP + override + approved > original → splits into cost + markup rows
-- `_validate()` — asserts alcohol/lounge/personal billed $0 and `grand_total == labour + expense`
+`AMOUNT_MISMATCH` is **not** blocking — analyst approves receipt amount while SAP discrepancy is investigated.
 
 ---
 
@@ -287,8 +282,8 @@ class BuildResult:
 | `test_doc_parser.py` | 25 | Document ID filtering, composite/unreadable/alcohol detection |
 | `test_loader.py` | 34 | IngestionResult scoping — timecards, documents, static data |
 | `test_sync_rules.py` | 79 | JSON rule values, sync idempotency, keyword lists |
-| `test_invoice_builder.py` | 71 | Totals for all 6 submissions, file creation, audit trail headers, validation, helpers |
-| **Total** | **231** | **All passing** |
+| `test_invoice_builder.py` | 55 | Contacts loader (6), notice writer (12), project invoice (19), helpers (18) |
+| **Total** | **215** | **All passing** |
 
 ### Pending tests (Phase 7 completion)
 - `tests/test_rules.py` — each rule evaluation against known inputs
@@ -297,7 +292,7 @@ class BuildResult:
 
 ---
 
-## Contract Rule Values (as of `rules/data/*.json`)
+## Contract Rule Values
 
 | Rule | Value |
 |------|-------|
@@ -317,10 +312,10 @@ class BuildResult:
 
 | ID | Type | What it does |
 |----|------|-------------|
-| PL-EMAIL-01 | OVERRIDE_REJECT | Rejects airport lounge, drops it from invoice |
-| PL-EMAIL-02 | OVERRIDE_REJECT (mixed) | Rejects "not appropriate" charges; body also approves working dinner $118 |
-| PL-EMAIL-03 | OVERRIDE_APPROVE | Approves over-cap hotel $310 (PL written approval) |
-| PL-EMAIL-04 | RELEASE_HOLD (mixed) | Releases principal cap hold; body also confirms drone subcontractor markup |
+| PL-EMAIL-01 | OVERRIDE_REJECT | Rejects airport lounge |
+| PL-EMAIL-02 | OVERRIDE_REJECT (mixed) | Rejects "not appropriate" charges; also approves working dinner $118 |
+| PL-EMAIL-03 | OVERRIDE_APPROVE | Approves over-cap hotel $310 |
+| PL-EMAIL-04 | RELEASE_HOLD (mixed) | Releases principal cap hold; also confirms drone subcontractor markup |
 | PL-EMAIL-05 | OVERRIDE_REJECT | Rejects miscoded training and PMO admin labour |
 
 ---
@@ -357,7 +352,7 @@ def run(submission_path: Path) -> None:
             run_rule_check_tool,
             match_documents_tool,
             detect_exceptions_tool,
-            build_invoice_tool,
+            write_notices_tool,
         ],
         system=BILLING_SUPERVISOR_SYSTEM_PROMPT,
         messages=[{"role": "user", "content": f"Process submission: {submission_path}"}],
@@ -368,7 +363,7 @@ def run(submission_path: Path) -> None:
 - Invoked only when `exception_report.unresolved_count > 0`
 - Reads Decision Memory + Instruction store
 - Returns `{"auto_resolved": [...], "escalate": [...]}`
-- Novel exceptions → flag to employee → re-trigger loop (idempotent by tx_id)
+- Novel exceptions → flag to employee via notice → re-trigger loop (idempotent by tx_id)
 
 ---
 
@@ -377,9 +372,11 @@ def run(submission_path: Path) -> None:
 | File | Purpose |
 |------|---------|
 | `IMPLEMENTATION_PLAN.md` | Full phased plan with progress tracker and rule values |
-| `EXECUTION_FLOW.md` | Step-by-step data flow through all 5 phases |
-| `billing_agent/main.py` | Pipeline orchestrator — shows all phase wiring |
+| `EXECUTION_FLOW.md` | Step-by-step data flow — both triggers explained |
+| `billing_agent/main.py` | Per-submission pipeline orchestrator |
+| `billing_agent/invoice_run.py` | Month-end invoice CLI |
 | `billing_agent/rules/rule_engine.py` | Rule evaluation logic |
-| `billing_agent/output/invoice_builder.py` | Phase 5 invoice/audit/exceptions generation |
-| `appendix-sample-data/restricted/expected-invoice.md` | Ground truth invoice with 22 checkpoints |
+| `billing_agent/output/notice_writer.py` | Employee notices + analyst summary |
+| `billing_agent/output/invoice_builder.py` | Project-level invoice generation |
+| `billing_agent/data/contacts.json` | Employee/analyst/PL contact directory |
 | `output/billing_agent.log` | Append-mode run log — all historical runs |

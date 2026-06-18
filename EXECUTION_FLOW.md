@@ -1,13 +1,15 @@
 # Execution Flow: Agentic Billing Review System
 
 **Project:** Meridian Atlas Partners — Coastal Greenway (PRJ-NS-7421)  
-**Last updated:** 2026-06-18 (Phase 5 complete)
+**Last updated:** 2026-06-18 (Phase 5 redesign — two triggers)
 
 This document describes what happens step-by-step when a submission file enters the system, how each phase transforms the data, and what flows into the next phase.
 
 ---
 
 ## System Overview
+
+### Trigger 1 — Drop-folder watcher (per submission)
 
 ```
 Employee / SAP
@@ -20,27 +22,47 @@ submissions/incoming/          ← CSV dropped here
      │
      ▼
 [PHASE 1] Ingestion ─────────────────────────────────────────────────► IngestionResult
-     │                                                                        │
-     ▼                                                                        │
-[PHASE 2] Rule Engine ◄──── rules/data/*.json ◄──── contract-001.md          │
-     │                                                                        │
-     ▼                                                                        │
-[PHASE 3] Matching & Reconciliation                                           │
-     │                                                                        │
-     ▼                                                                        │
-[PHASE 4] Exception Detection & Triage ◄──── PL emails, prior exceptions     │
-     │                                                                        │
-     ▼                                                                        │
-[PHASE 5] Invoice Builder & Output Generation                                 │
-     │                                                                        │
-     ▼                                                                        │
-[PHASE 6] Agentic Orchestration (Claude API)  ◄───────────────────────────── ┘
+     │
+     ▼
+[PHASE 2] Rule Engine ◄──── rules/data/*.json ◄──── contract-001.md
+     │
+     ▼
+[PHASE 3] Matching & Reconciliation
+     │
+     ▼
+[PHASE 4] Exception Detection & Triage ◄──── PL emails, prior exceptions
+     │
+     ▼
+[PHASE 5a] Notice Writer (per-submission)
+     │
+     ▼
+[PHASE 6] Agentic Orchestration (Claude API)  ← stub today
      │
      ▼
 submissions/completed/         ← timestamped archive
 output/billing_agent.log       ← full run trace
-output/draft-invoice.md        ← billable invoice
-output/exceptions-report.md    ← flagged items + resolutions
+output/notices/exception-notice-{emp}-{stem}__{ts}.md    ← per-employee notice
+output/analyst-summary-{stem}__{ts}.md                   ← analyst summary
+```
+
+### Trigger 2 — Month-end invoice CLI
+
+```
+All submissions for project+month are in completed/
+     │
+     ▼
+python3 -m billing_agent.invoice_run --project PRJ-NS-7421 --month 2026-04
+     │
+     ▼
+[PHASE 5b] Invoice Builder (project-level)
+     │  re-reads all completed CSVs for project+month
+     │  re-runs Phases 1–4 for each submission
+     │  aggregates all results
+     │
+     ▼
+output/draft-invoice-{project}-{month}.md          ← one canonical invoice
+output/audit-trail-{project}-{month}.csv           ← all 36 transactions
+output/exceptions-report-{project}-{month}.md      ← project-wide exceptions
 ```
 
 ---
@@ -77,7 +99,7 @@ _handle(submission)
   │     ├─► [Phase 2/3]  rule_engine.run()         ← wired
   │     ├─► [Phase 3]  matcher.reconcile()        ← wired
   │     ├─► [Phase 4]  detector.run()             ← wired
-  │     ├─► [Phase 5]  invoice_builder.build()    ← wired
+  │     ├─► [Phase 5a] notice_writer.write_notices() ← wired (employee notices + analyst summary)
   │     └─► [Phase 6]  supervisor.run()           ← stub today
   ├─► shutil.move(processing/ → completed/__timestamp__.csv)
   └─► run_logger.close_run(success=True)          seal log after file is safely archived
@@ -350,85 +372,128 @@ detector.run(inputs, rule_results, match_results)
 
 ---
 
-## Phase 5 — Invoice Builder & Output Generation  ✅ Complete
+## Phase 5a — Notice Writer (per-submission)  ✅ Complete
 
-**Entry point:** `build(inputs, rule_results, match_results, exception_report)` in `billing_agent/output/invoice_builder.py`  
-**Input:** `IngestionResult` + `List[RuleResult]` + `List[MatchResult]` + `ExceptionReport`  
-**Output:** `BuildResult` + three timestamped files in `output/`
+**Entry point:** `write_notices(inputs, rule_results, exception_report, contacts)` in `billing_agent/output/notice_writer.py`  
+**Input:** `IngestionResult` + `List[RuleResult]` + `ExceptionReport` + `ContactDirectory`  
+**Output:** `List[Path]` — employee notice files + analyst summary file
 
 ### Execution steps
 
 ```
-invoice_builder.build(inputs, rule_results, match_results, exception_report)
+notice_writer.write_notices(inputs, rule_results, exception_report, contacts)
   │
-  ├─1─ partition rule results
-  │      billable  = [r for r in rule_results if r.status == "APPROVE"]
-  │      labour    = [r for r in billable if tx.is_labor]
-  │      expenses  = [r for r in billable if tx.is_expense]
-  │      non_bill  = [r for r in rule_results if r.status != "APPROVE"]
+  ├─1─ for each employee_id in submission:
+  │      items = all exception items for this employee
+  │        (escalate_employee + escalate_analyst + escalate_pl + hard_rejections)
+  │      if no items → skip (clean employee, no notice)
+  │      else:
+  │        emp = contacts.employee(emp_id)
+  │        _write_employee_notice(notices_dir / exception-notice-{id}-{stem}__{ts}.md)
+  │          addressed to emp.name (emp.email)
+  │          split items into "Blocking" and "Under review" tables
+  │          each row includes _ACTION[rule_id] — plain-English corrective action
   │
-  ├─2─ compute totals
+  └─2─ _write_analyst_summary(output/analyst-summary-{stem}__{ts}.md)
+         addressed to contacts.billing_analysts[0]
+         headline counts table
+         ⚠ Blocking items section (if any)
+         Requires analyst review section
+         Requires PL approval section
+         Auto-resolved section
+         Rejected items section
+         footer: "Run billing_agent.invoice_run at month-end…"
+
+  returns [notice_path_1, ..., analyst_summary_path]
+```
+
+### `_ACTION` corrective instruction map (rule_id → plain English)
+
+| Rule | Employee instruction |
+|------|---------------------|
+| NO_RECEIPT | Upload missing receipt to SAP and resubmit |
+| ALCOHOL | Remove charge — not reimbursable (§4) |
+| PERSONAL_ITEM | Remove charge — personal items not reimbursable (§4) |
+| MISCODED | Correct task code in SAP |
+| CURRENCY | Resubmit with USD amount + exchange rate note |
+| … | (full map in `notice_writer._ACTION`) |
+
+---
+
+## Phase 5b — Invoice Builder (project-level month-end)  ✅ Complete
+
+**Entry point:** `build(project_id, billing_month, contacts, submissions_dir)` in `billing_agent/output/invoice_builder.py`  
+**CLI:** `python3 -m billing_agent.invoice_run --project PRJ-NS-7421 --month 2026-04`  
+**Output:** `BuildResult` + three canonical files in `output/`
+
+### Execution steps
+
+```
+invoice_builder.build(project_id, billing_month, contacts, submissions_dir)
+  │
+  ├─1─ _find_submissions(submissions_dir, billing_month)
+  │      → all CSVs in submissions_dir whose name contains billing_month
+  │      → raises FileNotFoundError if none found
+  │
+  ├─2─ for each csv_path in csv_files:
+  │      re-run full Phases 1–4 (idempotent):
+  │        inputs = load_inputs(csv_path)
+  │        rr     = rule_engine.run(inputs)
+  │        mr     = reconcile(inputs, rr)
+  │        er     = detect_exceptions(inputs, rr, mr)
+  │      aggregate into all_inputs[], all_rr[], all_mr[], exception lists
+  │
+  ├─3─ build combined ExceptionReport (project-wide across all submissions)
+  │
+  ├─4─ partition rule results
+  │      billable  = [r for r in all_rr if r.status == "APPROVE"]
+  │      labour / expenses / non_bill split
+  │
+  ├─5─ compute totals
   │      labour_total  = sum(r.approved_amount for r in labour)
   │      expense_total = sum(r.approved_amount for r in expenses)
   │      grand_total   = labour_total + expense_total
   │
-  ├─3─ write draft invoice (Markdown)
-  │      output/draft-invoice-{stem}__{ts}.md
-  │      │
-  │      ├─ Section A — Labour
-  │      │    table: Role | Description | Hrs | Rate | Amount
-  │      │    APPROVE-only lines; footnote ¹ marks overrides
-  │      │    Excluded labour listed below subtotal with reason
-  │      │
-  │      ├─ Section B — Reimbursable Expenses
-  │      │    grouped by _categorize(tx):
-  │      │      AIR / LODGING / MEALS / GROUND / MILEAGE / SUBCONTRACTOR / OTHER
-  │      │    for SUBCONTRACTOR lines where _has_markup() is True:
-  │      │      → split into two rows: cost + markup (8%)
-  │      │    note column: override citation + FX delta from MatchResult
-  │      │
-  │      └─ Totals + Excluded / Blocked items
+  ├─6─ write draft invoice (Markdown)
+  │      output/draft-invoice-{project_id}-{billing_month}.md
+  │      Section A — Labour (with Employee column, names from contacts)
+  │      Section B — Reimbursable Expenses (by category)
+  │        SUBCONTRACTOR with _has_markup() → cost + markup split rows
+  │      Totals + Excluded/Blocked items
   │
-  ├─4─ write audit trail (CSV)
-  │      output/audit-trail-{stem}__{ts}.csv
-  │      one row per transaction (APPROVE + non-billable alike):
-  │        transaction_id, employee_id, type, description,
-  │        original_amount, approved_amount, status,
-  │        rule_id, exception_type, override_applied, override_source,
-  │        matched_doc_id, match_confidence, amount_delta, note
+  ├─7─ write audit trail (CSV)
+  │      output/audit-trail-{project_id}-{billing_month}.csv
+  │      17 columns including submission (filename stem) and employee_name
+  │      one row per transaction across all submissions
   │
-  ├─5─ write exceptions report (Markdown)
-  │      output/exceptions-report-{stem}__{ts}.md
-  │      sections:
-  │        Auto-resolved (PL instruction or prior-exception pattern)
-  │        PL rejections
-  │        Hard rejections (contract rule — employee must remove from SAP)
-  │        Escalate → PL (over-cap, unreleased hold)
-  │        Escalate → Analyst (amount/rate/FX discrepancy)
-  │        Escalate → Employee (missing receipt, miscoding)
-  │      blocking items marked ⚠ BLOCKS
+  ├─8─ write exceptions report (Markdown)
+  │      output/exceptions-report-{project_id}-{billing_month}.md
+  │      project-wide view: all 6 submissions combined
+  │      employee names resolved from contacts
   │
-  └─6─ validate
+  └─9─ validate
          assert: ALCOHOL / AIRPORT_LOUNGE / PERSONAL_ITEM approved_amount == 0.0
          assert: abs(grand_total − labour − expense) <= 0.01
          log result to billing_agent.log
 
   returns BuildResult{
+    project_id, billing_month,
     invoice_path, audit_path, exceptions_path,
     labour_total, expense_total, grand_total,
-    blocked_count   ← len(exception_report.blocking)
+    blocked_count, submission_count
   }
 ```
 
 ### Helper functions
 
-| Helper | Purpose |
-|--------|---------|
-| `_categorize(tx)` | Maps transaction to `AIR/LODGING/MEALS/GROUND/MILEAGE/SUBCONTRACTOR/OTHER` based on unit and description keywords |
-| `_has_markup(r)` | Returns True when exception_type=="SUBCONTRACTOR_MARKUP", override_applied=True, approved > original — triggers the cost+markup split display |
-| `_expense_note(r, mr)` | Builds the note column: override citation + FX delta direction |
-| `_infer_cycle(inputs)` | Extracts `YYYY-MM` from submission filename for invoice header |
-| `_validate(result, rr, tx_by_id)` | Asserts hard-reject items billed $0 and totals balance |
+| Helper | Location | Purpose |
+|--------|----------|---------|
+| `_categorize(tx)` | invoice_builder | Maps tx to `AIR/LODGING/MEALS/GROUND/MILEAGE/SUBCONTRACTOR/OTHER` |
+| `_has_markup(r)` | invoice_builder | True when SUBCONTRACTOR_MARKUP override_applied + approved > original |
+| `_expense_note(r, mr)` | invoice_builder | Note column: override citation + FX delta direction |
+| `_find_submissions(dir, month)` | invoice_builder | Collects all CSVs in dir whose name contains billing_month |
+| `_validate(result, rr, tx_by_id)` | invoice_builder | Asserts hard-reject items billed $0 and totals balance |
+| `_infer_cycle(inputs)` | notice_writer | Extracts `YYYY-MM` from submission filename for notice header |
 
 ---
 
@@ -510,11 +575,17 @@ ExceptionReport {
   escalate_pl[], blocking[]
 }
      │
-     ▼ Phase 5
-BuildResult + three timestamped files {
-  draft-invoice-{stem}__{ts}.md      Section A (labour) + Section B (expenses by category) + totals
-  audit-trail-{stem}__{ts}.csv       one row per transaction — rule, override, match, delta
-  exceptions-report-{stem}__{ts}.md  all non-APPROVE items: routing, blocking flag, override source
+     ▼ Phase 5a (per-submission watcher trigger)
+List[Path] — notices written {
+  output/notices/exception-notice-{emp_id}-{stem}__{ts}.md   one per affected employee
+  output/analyst-summary-{stem}__{ts}.md                     aggregate analyst view
+}
+
+     ▼ Phase 5b (month-end CLI trigger — re-reads completed/)
+BuildResult + three canonical project files {
+  output/draft-invoice-{project}-{month}.md      Section A (labour+Employee) + Section B (by category)
+  output/audit-trail-{project}-{month}.csv       17 cols including submission + employee_name
+  output/exceptions-report-{project}-{month}.md  project-wide: all submissions combined
 }
 ```
 
