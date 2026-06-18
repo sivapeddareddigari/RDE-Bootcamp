@@ -20,6 +20,7 @@ import sys
 from pathlib import Path
 
 from billing_agent.config import COMPLETED_DIR, OUTPUT_DIR
+from billing_agent.email.mailer import send_invoice_emails
 from billing_agent.ingestion.contacts_loader import load_contacts
 from billing_agent.output.invoice_builder import build
 
@@ -85,6 +86,20 @@ def main() -> None:
     log.info("  Draft invoice   → %s", result.invoice_path)
     log.info("  Audit trail     → %s", result.audit_path)
     log.info("  Exceptions      → %s", result.exceptions_path)
+
+    send_invoice_emails(
+        invoice_path    = result.invoice_path,
+        audit_path      = result.audit_path,
+        exceptions_path = result.exceptions_path,
+        labour_total    = result.labour_total,
+        expense_total   = result.expense_total,
+        grand_total     = result.grand_total,
+        blocked_count   = result.blocked_count,
+        submission_count= result.submission_count,
+        billing_month   = args.month,
+        project_id      = args.project,
+        contacts        = contacts,
+    )
 
     if result.blocked_count > 0:
         log.warning(

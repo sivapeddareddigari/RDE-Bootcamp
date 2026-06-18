@@ -24,6 +24,7 @@ import anthropic
 from billing_agent import run_logger
 from billing_agent.agents.exception_agent import ExceptionAnalysis
 from billing_agent.agents.exception_agent import run as _exception_agent_run
+from billing_agent.email.mailer import send_submission_emails
 from billing_agent.exceptions import run as detect_exceptions
 from billing_agent.exceptions.models import ExceptionReport
 from billing_agent.ingestion import load_inputs
@@ -194,7 +195,9 @@ def run(submission_path: Path, contacts: ContactDirectory) -> SupervisorResult:
         run_logger.step("Supervisor — falling back to deterministic pipeline", "warn")
         _direct_fallback(submission_path, contacts, state)
 
-    return _build_result(state)
+    result = _build_result(state)
+    _dispatch_emails(result, contacts)
+    return result
 
 
 # ── Tool implementations ──────────────────────────────────────────────────────
@@ -334,6 +337,13 @@ def _build_result(state: Dict) -> SupervisorResult:
             1 for a in s["analyses"] if a.recommendation == "AUTO_RESOLVE"
         ),
     )
+
+
+def _dispatch_emails(result: SupervisorResult, contacts: ContactDirectory) -> None:
+    try:
+        send_submission_emails(result.notices_written, contacts)
+    except Exception as exc:
+        log.warning("Email dispatch failed (%s) — pipeline result unaffected", exc)
 
 
 # ── System prompt ─────────────────────────────────────────────────────────────
