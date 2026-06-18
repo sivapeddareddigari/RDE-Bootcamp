@@ -13,7 +13,7 @@
 |-------|-------------|--------|-----------|
 | Trigger | Drop folder watcher | ✅ Done | `e078864` |
 | Phase 1 | Scaffolding & ingestion | ✅ Done | `e078864` → `624b1d5` |
-| Phase 2 | Rule engine | ⏳ Pending | — |
+| Phase 2 | Rule engine | 🔄 In Progress | `6ea7ba5` |
 | Phase 3 | Matching & reconciliation | ⏳ Pending | — |
 | Phase 4 | Exception detection & triage | ⏳ Pending | — |
 | Phase 5 | Invoice builder & outputs | ⏳ Pending | — |
@@ -52,6 +52,45 @@
 ### Contract constants loaded
 
 - 6 role rate entries · 18 contract clauses · 5 PL email instructions · 10 prior exception cases
+
+---
+
+## Phase 2 — In Progress
+
+### What was built (rule infrastructure)
+
+| Component | Description | Commit |
+|-----------|-------------|--------|
+| `rules/data/expense_caps.json` | Lodging caps, meal caps, air class threshold, mileage rate, receipt threshold, subcontractor markup — auto-generated from contract | `6ea7ba5` |
+| `rules/data/labour_rules.json` | Role rates, principal cap %, travel-time billing rate and hour cap — auto-generated from contract | `6ea7ba5` |
+| `rules/data/policy_rules.json` | Hard yes/no policy flags (alcohol, personal items, entertainment) with override_allowed flag — auto-generated from contract | `6ea7ba5` |
+| `rules/data/keyword_lists.json` | Operational detection word lists (alcohol, personal items, miscoded labour, lounge) — manually maintained | `6ea7ba5` |
+| `rules/sync_rules.py` | Parses `contract-001.md` and regenerates the three auto-generated JSON files; idempotent | `6ea7ba5` |
+| `.githooks/pre-commit` | Runs `sync_rules.py` and stages updated JSON whenever `contract-001.md` or `resolutions.csv` is committed | `6ea7ba5` |
+| `.claude/settings.json` | PostToolUse hook fires `sync_rules.py` immediately when `contract-001.md` is edited in a Claude Code session | `6ea7ba5` |
+
+### Sync chain
+
+```
+contract-001.md  ──[any change]──►  sync_rules.py  ──►  expense_caps.json   (auto)
+                                                    ──►  labour_rules.json   (auto)
+                                                    ──►  policy_rules.json   (auto)
+keyword_lists.json  ◄── manually maintained (detection keywords, no contractual source)
+```
+
+**Triggers:** `.githooks/pre-commit` (on git commit) · `.claude/settings.json` PostToolUse hook (on in-session edit)
+
+### Remaining Phase 2 work
+
+| Module | Description |
+|--------|-------------|
+| `rules/models.py` | `RuleResult` dataclass |
+| `rules/rule_engine.py` | Orchestrator — evaluates all rules per transaction, returns `List[RuleResult]` |
+| `rules/contract_rules.py` | Alcohol, personal items, receipt threshold, document quality flags — reads `policy_rules.json` + `keyword_lists.json` |
+| `rules/cap_rules.py` | Lodging, meal, mileage, air class cap checks — reads `expense_caps.json` |
+| `rules/labour_rules.py` | Rate validation, miscoded time, principal cap (cumulative), travel-time rate — reads `labour_rules.json` + `keyword_lists.json` |
+| `rules/subcontractor_rules.py` | 8% markup check — reads `expense_caps.json` |
+| `rules/override_resolver.py` | Matches flagged results against `ProjectInstruction[]` and recurring `ExceptionCase[]` from `IngestionResult` |
 
 ---
 
@@ -213,13 +252,20 @@ billing_agent/
 │   ├── doc_parser.py    ✅  load_documents(doc_ids) — filtered by note refs
 │   ├── email_parser.py  ✅  Parse sample-emails.md → ProjectInstruction list
 │   └── exception_loader.py ✅ Parse resolutions.csv → ExceptionCase list
-├── rules/               ⏳  (Phase 2)
-│   ├── rule_engine.py        Central rule dispatcher (priority-ordered)
-│   ├── lodging_rules.py      $275 metro / $195 elsewhere caps
-│   ├── meal_rules.py         $90/day receipt vs $65 per diem
-│   ├── travel_rules.py       Economy/premium economy, mileage rate
-│   ├── labour_rules.py       Principal cap, miscoded time, overtime
-│   └── subcontractor_rules.py  8% markup
+├── rules/               🔄  (Phase 2 — infrastructure done, logic pending)
+│   ├── data/
+│   │   ├── expense_caps.json    ✅ Auto-generated from contract (caps, rates, markup)
+│   │   ├── labour_rules.json    ✅ Auto-generated from contract (role rates, principal cap)
+│   │   ├── policy_rules.json    ✅ Auto-generated from contract (hard policy flags)
+│   │   └── keyword_lists.json   ✅ Manually maintained (detection word lists)
+│   ├── sync_rules.py        ✅ Parses contract → regenerates 3 JSON files
+│   ├── models.py            ⏳ RuleResult dataclass
+│   ├── rule_engine.py       ⏳ Orchestrator — returns List[RuleResult]
+│   ├── contract_rules.py    ⏳ Alcohol, personal, receipt threshold
+│   ├── cap_rules.py         ⏳ Lodging, meal, mileage, air class
+│   ├── labour_rules.py      ⏳ Rate validation, miscoded, principal cap
+│   ├── subcontractor_rules.py ⏳ 8% markup check
+│   └── override_resolver.py ⏳ PL instruction + historical pattern lookup
 ├── matching/            ⏳  (Phase 3)
 │   ├── matcher.py            Link transactions → documents
 │   ├── id_normalizer.py      Resolve employee/vendor IDs across sources
