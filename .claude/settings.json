@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // empty' 2>/dev/null); echo \"$f\" | grep -q 'contract-001\\.md' && cd /home/shiva/RDE-Bootcamp && python3 billing_agent/rules/sync_rules.py && echo 'Rule JSON files synced from contract.' || true"
+          }
+        ]
+      }
+    ]
+  }
+}

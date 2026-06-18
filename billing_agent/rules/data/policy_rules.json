@@ -1,0 +1,22 @@
+{
+  "_source": "MSA-NS-2024-0418",
+  "_section": "\u00a74 reimbursable expenses",
+  "_generated": "auto \u2014 do not edit; update contract-001.md and re-run sync_rules.py",
+  "policies": {
+    "alcohol": {
+      "reimbursable": false,
+      "override_allowed": false,
+      "override_requires": null
+    },
+    "personal_items": {
+      "reimbursable": false,
+      "override_allowed": false,
+      "override_requires": null
+    },
+    "entertainment": {
+      "reimbursable": false,
+      "override_allowed": true,
+      "override_requires": "prior_written_pl_approval"
+    }
+  }
+}
