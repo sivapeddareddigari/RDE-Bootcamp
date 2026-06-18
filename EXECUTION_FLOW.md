@@ -1,7 +1,7 @@
 # Execution Flow: Agentic Billing Review System
 
 **Project:** Meridian Atlas Partners — Coastal Greenway (PRJ-NS-7421)  
-**Last updated:** 2026-06-18 (Phase 4 complete)
+**Last updated:** 2026-06-18 (Phase 5 complete)
 
 This document describes what happens step-by-step when a submission file enters the system, how each phase transforms the data, and what flows into the next phase.
 
@@ -77,7 +77,7 @@ _handle(submission)
   │     ├─► [Phase 2/3]  rule_engine.run()         ← wired
   │     ├─► [Phase 3]  matcher.reconcile()        ← wired
   │     ├─► [Phase 4]  detector.run()             ← wired
-  │     ├─► [Phase 5]  invoice_builder.build()    ← stub today
+  │     ├─► [Phase 5]  invoice_builder.build()    ← wired
   │     └─► [Phase 6]  supervisor.run()           ← stub today
   ├─► shutil.move(processing/ → completed/__timestamp__.csv)
   └─► run_logger.close_run(success=True)          seal log after file is safely archived
@@ -350,53 +350,85 @@ detector.run(inputs, rule_results, match_results)
 
 ---
 
-## Phase 5 — Invoice Builder & Output Generation  *(not yet built)*
+## Phase 5 — Invoice Builder & Output Generation  ✅ Complete
 
-**Entry point:** `invoice_builder.build(inputs, rule_results, match_results, exception_report)` in `billing_agent/output/invoice_builder.py`  
-**Input:** All prior phase outputs  
-**Output:** Draft invoice + audit trail + exception report + analyst worksheet
+**Entry point:** `build(inputs, rule_results, match_results, exception_report)` in `billing_agent/output/invoice_builder.py`  
+**Input:** `IngestionResult` + `List[RuleResult]` + `List[MatchResult]` + `ExceptionReport`  
+**Output:** `BuildResult` + three timestamped files in `output/`
 
-### Execution steps (planned)
+### Execution steps
 
 ```
-invoice_builder.build(...)
+invoice_builder.build(inputs, rule_results, match_results, exception_report)
   │
-  ├─1─ filter to billable transactions
-  │      include: status == APPROVE or AUTO_RESOLVED
-  │      exclude: REJECT, unresolved MISSING_BACKUP, ALCOHOL, MISCODED_LABOUR
+  ├─1─ partition rule results
+  │      billable  = [r for r in rule_results if r.status == "APPROVE"]
+  │      labour    = [r for r in billable if tx.is_labor]
+  │      expenses  = [r for r in billable if tx.is_expense]
+  │      non_bill  = [r for r in rule_results if r.status != "APPROVE"]
   │
-  ├─2─ build invoice sections
-  │      Section A — Labour
-  │        group by role_code, sum hours × approved rate
-  │        exclude: miscoded lines, unreleased holds
-  │        include: released holds (RELEASE_HOLD override applied)
-  │        travel time: flag at 50% rate, cap 8hrs/direction
+  ├─2─ compute totals
+  │      labour_total  = sum(r.approved_amount for r in labour)
+  │      expense_total = sum(r.approved_amount for r in expenses)
+  │      grand_total   = labour_total + expense_total
+  │
+  ├─3─ write draft invoice (Markdown)
+  │      output/draft-invoice-{stem}__{ts}.md
   │      │
-  │      Section B — Expenses by category
-  │        LODGING       group by trip, one line per trip (PL standing instruction)
-  │        MEALS         receipt-based or per diem, not both same day
-  │        AIR TRAVEL    economy/premium economy as reconciled
-  │        GROUND        rideshare, transit, mileage at $0.67/mile
-  │        SUBCONTRACTOR cost line + separate 8% markup line (contract §5)
+  │      ├─ Section A — Labour
+  │      │    table: Role | Description | Hrs | Rate | Amount
+  │      │    APPROVE-only lines; footnote ¹ marks overrides
+  │      │    Excluded labour listed below subtotal with reason
+  │      │
+  │      ├─ Section B — Reimbursable Expenses
+  │      │    grouped by _categorize(tx):
+  │      │      AIR / LODGING / MEALS / GROUND / MILEAGE / SUBCONTRACTOR / OTHER
+  │      │    for SUBCONTRACTOR lines where _has_markup() is True:
+  │      │      → split into two rows: cost + markup (8%)
+  │      │    note column: override citation + FX delta from MatchResult
+  │      │
+  │      └─ Totals + Excluded / Blocked items
   │
-  ├─3─ apply adjustments
-  │      alcohol exclusion   → split amount out of approved receipt total
-  │      FX conversion       → CAD/EUR amounts at receipt-date spot rate
-  │      subcontractor       → add markup line separately on invoice
-  │      over-cap approved   → bill actual with SAP note citing PL override
+  ├─4─ write audit trail (CSV)
+  │      output/audit-trail-{stem}__{ts}.csv
+  │      one row per transaction (APPROVE + non-billable alike):
+  │        transaction_id, employee_id, type, description,
+  │        original_amount, approved_amount, status,
+  │        rule_id, exception_type, override_applied, override_source,
+  │        matched_doc_id, match_confidence, amount_delta, note
   │
-  ├─4─ write output files
-  │      output/draft-invoice.md        final invoice in SAP format
-  │      output/audit-trail.csv         per-transaction: rule fired, decision, amount
-  │      output/exceptions-report.md   all exceptions with resolution or escalation
-  │      output/kpi-summary.md          6 KPIs (cycle time, exception rate, etc.)
-  │      output/analyst-worksheet.md    open items requiring human judgment
+  ├─5─ write exceptions report (Markdown)
+  │      output/exceptions-report-{stem}__{ts}.md
+  │      sections:
+  │        Auto-resolved (PL instruction or prior-exception pattern)
+  │        PL rejections
+  │        Hard rejections (contract rule — employee must remove from SAP)
+  │        Escalate → PL (over-cap, unreleased hold)
+  │        Escalate → Analyst (amount/rate/FX discrepancy)
+  │        Escalate → Employee (missing receipt, miscoding)
+  │      blocking items marked ⚠ BLOCKS
   │
-  └─5─ validate totals
-         labour subtotal, expense subtotal, grand total
-         assert: alcohol = $0, lounge = $0, subcontractor includes markup
-         log to billing_agent.log
+  └─6─ validate
+         assert: ALCOHOL / AIRPORT_LOUNGE / PERSONAL_ITEM approved_amount == 0.0
+         assert: abs(grand_total − labour − expense) <= 0.01
+         log result to billing_agent.log
+
+  returns BuildResult{
+    invoice_path, audit_path, exceptions_path,
+    labour_total, expense_total, grand_total,
+    blocked_count   ← len(exception_report.blocking)
+  }
 ```
+
+### Helper functions
+
+| Helper | Purpose |
+|--------|---------|
+| `_categorize(tx)` | Maps transaction to `AIR/LODGING/MEALS/GROUND/MILEAGE/SUBCONTRACTOR/OTHER` based on unit and description keywords |
+| `_has_markup(r)` | Returns True when exception_type=="SUBCONTRACTOR_MARKUP", override_applied=True, approved > original — triggers the cost+markup split display |
+| `_expense_note(r, mr)` | Builds the note column: override citation + FX delta direction |
+| `_infer_cycle(inputs)` | Extracts `YYYY-MM` from submission filename for invoice header |
+| `_validate(result, rr, tx_by_id)` | Asserts hard-reject items billed $0 and totals balance |
 
 ---
 
@@ -479,11 +511,10 @@ ExceptionReport {
 }
      │
      ▼ Phase 5
-Output files {
-  draft-invoice.md      billable lines, approved amounts
-  audit-trail.csv       per-line rule citation
-  exceptions-report.md  flagged items + resolution
-  analyst-worksheet.md  open items for human review
+BuildResult + three timestamped files {
+  draft-invoice-{stem}__{ts}.md      Section A (labour) + Section B (expenses by category) + totals
+  audit-trail-{stem}__{ts}.csv       one row per transaction — rule, override, match, delta
+  exceptions-report-{stem}__{ts}.md  all non-APPROVE items: routing, blocking flag, override source
 }
 ```
 

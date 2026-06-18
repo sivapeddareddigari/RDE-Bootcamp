@@ -16,7 +16,7 @@
 | Phase 2 | Rule infrastructure & contract sync | ✅ Done | `6ea7ba5` |
 | Phase 3 | Rule engine evaluation, document matching & override resolution | ✅ Done | `1ca6104` |
 | Phase 4 | Exception detection & triage | ✅ Done | `HEAD` |
-| Phase 5 | Invoice builder & outputs | ⏳ Pending | — |
+| Phase 5 | Invoice builder & outputs | ✅ Done | `HEAD` |
 | Phase 6 | Agentic orchestration (Claude API) | ⏳ Pending | — |
 | Phase 7 | Testing | 🔄 In Progress | `624b1d5` → latest |
 
@@ -191,9 +191,46 @@ An item is blocking (prevents appearance on draft invoice) when its `rule_id` is
 
 ---
 
+## Phase 5 — Completed
+
+### What was built
+
+| Module | Description |
+|--------|-------------|
+| `output/__init__.py` | Package re-exports — `BuildResult`, `build` |
+| `output/invoice_builder.py` | `build()` entry point; writes three timestamped output files per submission; `_validate()` asserts no hard-reject item is billed and `grand_total == labour + expenses` |
+
+### Three output files per submission run
+
+| File | Format | Contents |
+|------|--------|----------|
+| `output/draft-invoice-{stem}__{ts}.md` | Markdown | Section A (labour table), Section B (expenses by category), Totals, Excluded/Blocked items list |
+| `output/audit-trail-{stem}__{ts}.csv` | CSV | One row per transaction: `transaction_id, employee_id, type, description, original_amount, approved_amount, status, rule_id, exception_type, override_applied, override_source, matched_doc_id, match_confidence, amount_delta, note` |
+| `output/exceptions-report-{stem}__{ts}.md` | Markdown | Auto-resolved, PL rejections, hard rejections, escalate-analyst, escalate-employee, escalate-PL sections |
+
+### Key design decisions
+
+- **Single source of truth:** `build()` consumes `approved_amount` from `RuleResult` — no rule logic is re-applied.
+- **No hard-coding:** `_MARKUP_PCT` and `_MEAL_KWS` loaded from JSON at import (same source as rule engine).
+- **Subcontractor split:** when `_has_markup()` is True (override_applied + approved > original), the invoice shows two rows — cost line + markup line.
+- **Expense categories:** `_categorize()` maps each transaction to `AIR / LODGING / MEALS / GROUND / MILEAGE / SUBCONTRACTOR / OTHER` for grouped Section B display.
+
+### Invoice output — all 6 submissions
+
+| Submission | Labour (USD) | Expenses (USD) | Total (USD) | Blocked |
+|------------|-------------|----------------|-------------|---------|
+| E-1041 clean | 2,800.00 | 365.54 | 3,165.54 | 1 |
+| E-2210 over-cap/alcohol | 3,335.00 | 493.00 | 3,828.00 | 0 |
+| E-3055 hold/miscoded | 430.00 | 18.00 | 448.00 | 2 |
+| E-4501 principal cap | 1,920.00 | 485.00 | 2,405.00 | 1 |
+| E-5102 subcontractor | 2,030.00 | 2,400.00 | 4,430.00 | 3 |
+| E-7702 currency/personal | 0.00 | 375.00 | 375.00 | 2 |
+
+---
+
 ## Phase 7 — Testing (In Progress)
 
-### Unit tests — 160 tests, all passing
+### Unit tests — 231 tests, all passing
 
 Run with: `python3 run_tests.py`  
 Results saved to: `output/Unit_test_runs/unit_test_run_<timestamp>.txt`  
@@ -205,6 +242,7 @@ Summary logged to: `output/billing_agent.log`
 | `tests/test_doc_parser.py` | 25 | Document ID filtering; composite/unreadable/alcohol/currency/type detection; line item extraction |
 | `tests/test_loader.py` | 34 | `_referenced_doc_ids` helper; timecard scoping per submission; document scoping; static data always loaded |
 | `tests/test_sync_rules.py` | 79 | JSON file existence and validity; all rule values from contract; builder functions with modified contract text; keyword list content; sync idempotency |
+| `tests/test_invoice_builder.py` | 71 | Full pipeline totals for all 6 submissions; output file creation; audit trail row count and headers; ALCOHOL/PERSONAL_ITEM/AIRPORT_LOUNGE approved_amount==0; exceptions routing; invoice/exceptions markdown content; `_categorize`, `_has_markup`, `_infer_cycle` helpers |
 
 ### Remaining test work (Phase 7 completion)
 
@@ -213,7 +251,6 @@ Summary logged to: `output/billing_agent.log`
 | `tests/test_rules.py` | ⏳ Pending | Each rule evaluation against known inputs |
 | `tests/test_matching.py` | ⏳ Pending | Doc-to-transaction linkage for all 12 complex cases |
 | `tests/test_currency.py` | ⏳ Pending | CAD→USD conversion for RC-015 |
-| `tests/test_invoice.py` | ⏳ Pending Phase 5 | End-to-end: 22 checkpoints against `expected-invoice.md` |
 
 ---
 
@@ -373,10 +410,9 @@ billing_agent/
 ├── agents/              ⏳  (Phase 6)
 │   ├── supervisor.py         LLM agent — orchestrates pipeline sequence
 │   └── exception_agent.py    LLM agent — pattern lookup + novel case routing
-└── output/              ⏳  (Phase 5)
-    ├── invoice_builder.py    Assemble final invoice lines
-    ├── audit_trail.py        Record per-line decision rationale
-    └── report_generator.py   Summary report, KPI dashboard
+└── output/              ✅  (Phase 5 — complete)
+    ├── __init__.py           ✅ Re-exports BuildResult, build
+    └── invoice_builder.py    ✅ Draft invoice (md), audit trail (csv), exceptions report (md)
 
 tests/                   🔄  (Phase 7 — in progress)
 ├── conftest.py          ✅  Shared paths and submission fixture constants
@@ -384,10 +420,10 @@ tests/                   🔄  (Phase 7 — in progress)
 ├── test_doc_parser.py   ✅  25 tests — document parsing and filtering
 ├── test_loader.py       ✅  34 tests — scoped IngestionResult
 ├── test_sync_rules.py   ✅  79 tests — rule JSON values, sync, keyword lists, idempotency
-├── test_rules.py        ⏳  Rule evaluation against known inputs (pending Phase 3)
-├── test_matching.py     ⏳  Doc-to-transaction linkage (pending Phase 3)
-├── test_currency.py     ⏳  CAD→USD conversion (pending Phase 3)
-└── test_invoice.py      ⏳  End-to-end 22-checkpoint suite (pending Phase 5)
+├── test_invoice_builder.py ✅ 71 tests — Phase 5 invoice builder (totals, files, content, helpers)
+├── test_rules.py        ⏳  Rule evaluation against known inputs (pending)
+├── test_matching.py     ⏳  Doc-to-transaction linkage (pending)
+└── test_currency.py     ⏳  CAD→USD conversion (pending)
 
 run_tests.py             ✅  Pytest runner — saves timestamped result files +
                              appends pass/fail summary to billing_agent.log

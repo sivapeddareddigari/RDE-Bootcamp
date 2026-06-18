@@ -26,6 +26,7 @@ from billing_agent import run_logger
 from billing_agent.rules import rule_engine
 from billing_agent.matching import reconcile
 from billing_agent.exceptions import run as detect_exceptions
+from billing_agent.output import build as build_invoice
 from billing_agent.config import (
     ACCEPTED_EXTENSIONS,
     COMPLETED_DIR,
@@ -70,7 +71,7 @@ def process_submission(submission_path: Path) -> None:
     exception_report = detect_exceptions(inputs, rule_results, match_results)
 
     run_logger.step("Phase 5 — invoice builder & outputs", "info")
-    # TODO Phase 5 — output.invoice_builder.build(inputs)
+    build_result = build_invoice(inputs, rule_results, match_results, exception_report)
 
     run_logger.step("Phase 6 — supervisor agent reasoning", "info")
     # TODO Phase 6 — agents.supervisor.run(inputs)
