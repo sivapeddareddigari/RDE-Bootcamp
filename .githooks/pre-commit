@@ -1,0 +1,23 @@
+#!/bin/bash
+# Re-generate rule JSON files whenever a contract source file is staged.
+# Sources watched: contract-001.md, resolutions.csv
+
+CHANGED=$(git diff --cached --name-only | grep -E \
+    "contracts/contract-001\.md|prior-exceptions/resolutions\.csv" || true)
+
+if [ -z "$CHANGED" ]; then
+    exit 0
+fi
+
+echo "Rule source changed ($CHANGED) — syncing rule JSON files..."
+python3 billing_agent/rules/sync_rules.py
+if [ $? -ne 0 ]; then
+    echo "ERROR: sync_rules.py failed — commit aborted."
+    exit 1
+fi
+
+git add billing_agent/rules/data/expense_caps.json \
+        billing_agent/rules/data/labour_rules.json \
+        billing_agent/rules/data/policy_rules.json
+
+echo "Rule JSON files updated and staged."

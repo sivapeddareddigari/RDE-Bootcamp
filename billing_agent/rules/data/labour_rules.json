@@ -1,0 +1,16 @@
+{
+  "_source": "MSA-NS-2024-0418",
+  "_section": "\u00a73 fees and rate table, project SAP notes",
+  "_generated": "auto \u2014 do not edit; update contract-001.md and re-run sync_rules.py",
+  "role_rates_usd_per_hour": {
+    "ENG1": 145.0,
+    "ENG2": 175.0,
+    "ENG3": 230.0,
+    "PM1": 215.0,
+    "PRIN": 320.0,
+    "ADMIN": 95.0
+  },
+  "travel_time_billing_rate_pct": 0.5,
+  "travel_time_max_hours_per_direction": 8,
+  "principal_cap_pct_of_monthly_hours": 0.05
+}

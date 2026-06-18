@@ -1,0 +1,29 @@
+{
+  "_source": "MSA-NS-2024-0418",
+  "_section": "\u00a73 subcontractor, \u00a74 expense rules",
+  "_generated": "auto \u2014 do not edit; update contract-001.md and re-run sync_rules.py",
+  "_manual_overrides": {
+    "mileage.rate_usd_per_mile": {
+      "value": 0.67,
+      "reason": "Contract says 'prevailing federal rate' with no explicit amount; set to current IRS rate."
+    }
+  },
+  "lodging": {
+    "metro_usd_per_night": 275.0,
+    "other_usd_per_night": 195.0
+  },
+  "meals": {
+    "receipt_usd_per_day": 90.0,
+    "per_diem_usd_per_day": 65.0,
+    "per_diem_stackable_with_receipt": false
+  },
+  "air_travel": {
+    "economy_max_hours": 6,
+    "premium_economy_min_hours": 6
+  },
+  "mileage": {
+    "rate_usd_per_mile": 0.67
+  },
+  "receipt_required_above_usd": 25.0,
+  "subcontractor_markup_pct": 0.08
+}

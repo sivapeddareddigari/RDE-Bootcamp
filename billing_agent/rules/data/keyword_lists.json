@@ -1,0 +1,25 @@
+{
+  "_note": "Manually maintained — these are operational detection keywords, not contract text. Update when new patterns are identified in billing submissions.",
+  "alcohol": [
+    "alcohol", "alcoholic", "beer", "lager", "ale", "wine", "house red",
+    "house white", "spirits", "whisky", "whiskey", "champagne", "prosecco",
+    "cider", "cocktail", "gin", "vodka", "rum", "bourbon"
+  ],
+  "personal_items": [
+    "laundry", "dry cleaning", "personal", "clothing", "toiletries",
+    "gym", "spa", "minibar", "subscription", "gift", "souvenir"
+  ],
+  "miscoded_labour": [
+    "internal training", "training", "team training", "staff training",
+    "pmo admin", "pmo sync", "administrative", "admin call",
+    "internal meeting", "all hands", "company meeting", "onboarding"
+  ],
+  "airport_lounge": [
+    "lounge", "priority pass", "club access", "admirals club",
+    "sky club", "centurion lounge"
+  ],
+  "entertainment": [
+    "entertainment", "concert", "theatre", "theater", "sporting event",
+    "tickets", "show", "event"
+  ]
+}
