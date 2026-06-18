@@ -1,12 +1,14 @@
 """
-RunLogger — writes a live markdown run document to output/runs/ as the
-agent executes. Each step is one line: timestamp, status icon, description.
+RunLogger — appends every run to a single output/billing_agent.log file.
+
+Each run is separated by a header banner. Every step line carries the
+submission filename so the log stays grep-friendly across multiple runs.
 
 Usage from any module:
     from billing_agent import run_logger
     run_logger.step("Loaded 50 transactions (23 labour, 27 expense)")
-    run_logger.step("OVER_CAP: Hotel $310 exceeds $275 metro cap — TX-2026-05-0005", "warn")
-    run_logger.step("ALCOHOL: Drinks $38 rejected — non-reimbursable per §4", "error")
+    run_logger.step("OVER_CAP: Hotel $310 exceeds $275 metro cap", "warn")
+    run_logger.step("ALCOHOL: Drinks $38 rejected — non-reimbursable §4", "error")
 
 Status values:
     ok    ✓  — step completed successfully
@@ -22,7 +24,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from billing_agent.config import OUTPUT_DIR
+from billing_agent.config import LOG_FILE, OUTPUT_DIR
 
 log = logging.getLogger(__name__)
 
@@ -40,14 +42,14 @@ _current: Optional["RunLogger"] = None
 # ── Public API ────────────────────────────────────────────────────────────────
 
 def init_run(submission_name: str) -> "RunLogger":
-    """Create a new RunLogger for a submission. Call once at the start of each run."""
+    """Open a new run section in the shared log. Call once per submission."""
     global _current
     _current = RunLogger(submission_name)
     return _current
 
 
 def step(description: str, status: str = "ok") -> None:
-    """Log one step to the current run document. No-op if no run is active."""
+    """Append one step to the current run. No-op if no run is active."""
     if _current:
         _current.step(description, status)
     else:
@@ -55,7 +57,7 @@ def step(description: str, status: str = "ok") -> None:
 
 
 def close_run(success: bool = True) -> Optional[Path]:
-    """Finalise the current run document and return its path."""
+    """Write the run footer and return the log path."""
     global _current
     if _current:
         path = _current.close(success)
@@ -65,7 +67,7 @@ def close_run(success: bool = True) -> Optional[Path]:
 
 
 def current_log_path() -> Optional[Path]:
-    return _current.log_path if _current else None
+    return LOG_FILE if _current else None
 
 
 # ── RunLogger class ───────────────────────────────────────────────────────────
@@ -73,55 +75,46 @@ def current_log_path() -> Optional[Path]:
 class RunLogger:
 
     def __init__(self, submission_name: str):
+        self._submission = submission_name
         self._start_time = time.monotonic()
         self._start_dt   = datetime.now(timezone.utc)
-        ts               = self._start_dt.strftime("%Y%m%dT%H%M%SZ")
-        stem             = Path(submission_name).stem
 
-        runs_dir         = OUTPUT_DIR / "runs"
-        runs_dir.mkdir(parents=True, exist_ok=True)
+        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        self._fh = LOG_FILE.open("a", encoding="utf-8", buffering=1)
 
-        self.log_path    = runs_dir / f"{stem}__{ts}.md"
-        self._fh         = self.log_path.open("w", encoding="utf-8", buffering=1)
-
-        self._write_header(submission_name)
-        log.info("Run log → %s", self.log_path)
+        self._write_header()
+        log.info("Run log → %s", LOG_FILE)
 
     # ── Public ────────────────────────────────────────────────────────────────
 
     def step(self, description: str, status: str = "ok") -> None:
-        now  = datetime.now(timezone.utc).strftime("%H:%M:%S")
+        now  = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
         icon = _ICONS.get(status, "→")
-        self._fh.write(f"| `{now}` | {icon} | {description} |\n")
-        self._fh.flush()
+        self._fh.write(f"{now}  [{self._submission}]  {icon}  {description}\n")
         log.info("%s %s", icon, description)
 
     def close(self, success: bool = True) -> Path:
         elapsed = time.monotonic() - self._start_time
-        end_dt  = datetime.now(timezone.utc)
         result  = "SUCCESS" if success else "FAILED"
         icon    = "✓" if success else "✗"
+        end_dt  = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
-        self._fh.write("\n")
-        self._fh.write(f"---\n\n")
-        self._fh.write(f"**Completed:** {end_dt.strftime('%Y-%m-%d %H:%M:%S UTC')}  \n")
-        self._fh.write(f"**Duration:** {elapsed:.1f}s  \n")
-        self._fh.write(f"**Result:** {icon} {result}  \n")
-        self._fh.flush()
+        self._fh.write(
+            f"{'-' * 72}\n"
+            f"RESULT  [{self._submission}]  {icon} {result}"
+            f"  completed {end_dt}  ({elapsed:.1f}s)\n\n"
+        )
         self._fh.close()
 
-        log.info("Run log saved → %s  (%s  %.1fs)", self.log_path.name, result, elapsed)
-        return self.log_path
+        log.info("Run log saved → %s  (%s  %.1fs)", LOG_FILE.name, result, elapsed)
+        return LOG_FILE
 
     # ── Private ───────────────────────────────────────────────────────────────
 
-    def _write_header(self, submission_name: str) -> None:
+    def _write_header(self) -> None:
         started = self._start_dt.strftime("%Y-%m-%d %H:%M:%S UTC")
-        self._fh.write(f"# Billing Review Run\n\n")
-        self._fh.write(f"**Submission:** `{submission_name}`  \n")
-        self._fh.write(f"**Started:** {started}  \n")
-        self._fh.write(f"**Log:** `{self.log_path}`  \n\n")
-        self._fh.write(f"---\n\n")
-        self._fh.write(f"| Time | Status | Step |\n")
-        self._fh.write(f"|------|--------|------|\n")
-        self._fh.flush()
+        self._fh.write(
+            f"{'=' * 72}\n"
+            f"RUN  {self._submission}  started {started}\n"
+            f"{'=' * 72}\n"
+        )

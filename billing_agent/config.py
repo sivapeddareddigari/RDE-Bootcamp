@@ -12,6 +12,7 @@ COMPLETED_DIR  = SUBMISSIONS_DIR / "completed"
 FAILED_DIR     = SUBMISSIONS_DIR / "failed"
 
 OUTPUT_DIR     = BASE_DIR / "output"
+LOG_FILE       = OUTPUT_DIR / "billing_agent.log"
 
 # ── Watcher settings ──────────────────────────────────────────────────────────
 
