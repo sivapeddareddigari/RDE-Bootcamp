@@ -67,6 +67,7 @@ _ALCOHOL_KWS  = set(_KWS["alcohol"])
 _PERSONAL_KWS = set(_KWS["personal_items"])
 _MISCODED_KWS = set(_KWS["miscoded_labour"])
 _LOUNGE_KWS   = set(_KWS["airport_lounge"])
+_MEAL_KWS     = set(_KWS["meals"])
 
 
 # ── Public entry point ────────────────────────────────────────────────────────
@@ -216,9 +217,7 @@ def _check_caps(tx: Transaction, desc: str) -> Optional[RuleResult]:
         return None  # per diem within cap — approve without further meal checks
 
     # Meal with receipt
-    if any(kw in desc for kw in ("dinner", "lunch", "breakfast", "meal", "working meal",
-                                  "working dinner", "client meal", "client lunch",
-                                  "client dinner")):
+    if _hit(desc, _MEAL_KWS):
         if tx.amount > _MEAL_CAP:
             return _make(tx, "FLAG", "OVER_CAP", "MEAL_CAP", _MEAL_CAP,
                          f"Meal ${tx.amount:.2f} > ${_MEAL_CAP:.2f}/day cap")

@@ -16,13 +16,20 @@ After instructions, recurring ExceptionCase patterns are applied to any
 remaining FLAG/REJECT results.
 """
 
+import json
 import logging
 import re
+from pathlib import Path
 from typing import List
 
 from billing_agent.models.instruction import ExceptionCase, ProjectInstruction
 from billing_agent.models.transaction import Transaction
 from billing_agent.rules.models import RuleResult
+
+_DATA_DIR = Path(__file__).parent / "data"
+_MEAL_KWS: tuple = tuple(
+    json.loads((_DATA_DIR / "keyword_lists.json").read_text(encoding="utf-8"))["meals"]
+)
 
 log = logging.getLogger(__name__)
 
@@ -52,8 +59,7 @@ _REJECTION_RE = re.compile(
 _SCOPE_MAP = {
     # Use "hotel —" (with dash) to avoid matching "rideshare — hotel to site" etc.
     "lodging":         ("hotel —", "hotel stay", "lodging", "accommodation"),
-    "meals":           ("dinner", "lunch", "breakfast", "working meal", "working dinner",
-                        "client meal", "client lunch", "client dinner"),
+    "meals":           _MEAL_KWS,
     "airport lounge":  ("lounge", "priority pass", "club access"),
     "subcontractor":   ("subcontractor", "drone", "vendor invoice"),
     "hold":            (),

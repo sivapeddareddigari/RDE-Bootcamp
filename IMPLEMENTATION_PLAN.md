@@ -15,7 +15,7 @@
 | Phase 1 | Scaffolding & ingestion | ✅ Done | `e078864` → `624b1d5` |
 | Phase 2 | Rule infrastructure & contract sync | ✅ Done | `6ea7ba5` |
 | Phase 3 | Rule engine evaluation, document matching & override resolution | ✅ Done | `1ca6104` |
-| Phase 4 | Exception detection & triage | ⏳ Pending | — |
+| Phase 4 | Exception detection & triage | ✅ Done | `HEAD` |
 | Phase 5 | Invoice builder & outputs | ⏳ Pending | — |
 | Phase 6 | Agentic orchestration (Claude API) | ⏳ Pending | — |
 | Phase 7 | Testing | 🔄 In Progress | `624b1d5` → latest |
@@ -149,6 +149,45 @@ PL instructions are matched against each `RuleResult` using body-text regex (not
 - Per diem items only rejected if body explicitly names "per diem"
 - Clean items not rejected by mixed-intent emails (email primarily approves something else)
 - `_amount_close()` within ±$1 prevents same-email approvals from blocking same-email rejections of different charges
+
+---
+
+## Phase 4 — Completed
+
+### What was built
+
+| Module | Description | Commit |
+|--------|-------------|--------|
+| `exceptions/models.py` | `ExceptionItem` dataclass (transaction, routing, blocking flag); `ExceptionReport` dataclass with computed properties (`blocking`, `unresolved_count`, `exception_count`) | HEAD |
+| `exceptions/detector.py` | `run()` — classifies every non-APPROVE `RuleResult` into auto_resolved / hard_rejections / pl_rejections / escalate_analyst / escalate_employee / escalate_pl; logs triage summary | HEAD |
+| `exceptions/__init__.py` | Package re-exports | HEAD |
+| `main.py` | Phase 4 wired: `detect_exceptions(inputs, rule_results, match_results)` | HEAD |
+
+### Routing table (rule_id → actor)
+
+| Actor | Rule IDs | Action required |
+|-------|----------|----------------|
+| **ANALYST** | AMOUNT_MISMATCH, RATE_MISMATCH, TRAVEL_RATE, TRAVEL_HRS_CAP, MILEAGE_RATE, CURRENCY, COMPOSITE_DOC, MARKUP_MISSING | Review amounts / FX conversion / confirm figures |
+| **PL** | LODGING_CAP, MEAL_CAP, PER_DIEM_CAP, HOLD_ITEM | Written approval or hold release |
+| **EMPLOYEE** | NO_RECEIPT, UNREADABLE_DOC, MISCODED, ALCOHOL, AIRPORT_LOUNGE, PERSONAL_ITEM | Submit receipt / correct SAP entry |
+
+### Blocking flag logic
+
+An item is blocking (prevents appearance on draft invoice) when its `rule_id` is in:
+`LODGING_CAP`, `MEAL_CAP`, `PER_DIEM_CAP`, `HOLD_ITEM`, `NO_RECEIPT`, `UNREADABLE_DOC`, `CURRENCY`, `MARKUP_MISSING`
+
+`AMOUNT_MISMATCH` is not blocking — analyst can approve the receipt amount while the SAP discrepancy is investigated.
+
+### Exception triage — all 6 submissions
+
+| Submission | Clean | Auto-resolved | Rejected | Analyst | Employee | PL | Blocking |
+|------------|-------|--------------|----------|---------|----------|----|----------|
+| E-1041 (clean) | 4 | 1 | 0 | 1 | 1 | 0 | 1 |
+| E-2210 (over-cap/alcohol) | 3 | 2 | 2 | 0 | 0 | 0 | 0 |
+| E-3055 (hold/miscoded) | 2 | 1 | 1 | 0 | 2 | 0 | 2 |
+| E-4501 (principal cap) | 2 | 1 | 0 | 0 | 1 | 0 | 1 |
+| E-5102 (subcontractor) | 2 | 1 | 0 | 0 | 3 | 0 | 3 |
+| E-7702 (currency/personal) | 1 | 1 | 2 | 1 | 1 | 0 | 2 |
 
 ---
 
@@ -325,9 +364,9 @@ billing_agent/
 │   ├── __init__.py           Re-exports MatchResult, reconcile
 │   ├── matcher.py            ✅ EXACT/FUZZY document matching; FX delta computation
 │   └── currency.py           ✅ FX conversion (spot rates from config)
-├── exceptions/          ⏳  (Phase 4)
-│   ├── detector.py           Identify all exception types
-│   └── resolver.py           Apply PL overrides & historical patterns
+├── exceptions/          ✅  (Phase 4 — complete)
+│   ├── models.py             ✅ ExceptionItem, ExceptionReport dataclasses
+│   └── detector.py           ✅ Classify and triage all non-APPROVE rule results
 ├── stores/              ⏳  (Phase 6)
 │   ├── decision_memory.py    R/W pattern library (grows each cycle)
 │   └── instruction_store.py  R/W PL rules per project

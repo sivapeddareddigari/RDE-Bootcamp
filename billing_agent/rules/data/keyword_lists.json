@@ -18,6 +18,10 @@
     "lounge", "priority pass", "club access", "admirals club",
     "sky club", "centurion lounge"
   ],
+  "meals": [
+    "dinner", "lunch", "breakfast", "meal", "working meal", "working dinner",
+    "client meal", "client lunch", "client dinner"
+  ],
   "entertainment": [
     "entertainment", "concert", "theatre", "theater", "sporting event",
     "tickets", "show", "event"

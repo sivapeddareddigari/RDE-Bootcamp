@@ -26,14 +26,3 @@ FX_RATES = {
     "CAD": 0.74,
 }
 
-# ── Contract rule constants ───────────────────────────────────────────────────
-
-LODGING_CAP_METRO      = 275.00
-LODGING_CAP_OTHER      = 195.00
-MEAL_CAP_RECEIPT       = 90.00
-MEAL_CAP_PER_DIEM      = 65.00
-MILEAGE_RATE           = 0.67
-SUBCONTRACTOR_MARKUP   = 0.08
-RECEIPT_THRESHOLD      = 25.00
-PRINCIPAL_CAP_PCT      = 0.05
-AIR_PREMIUM_ECONOMY_HR = 6

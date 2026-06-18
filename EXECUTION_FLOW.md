@@ -1,7 +1,7 @@
 # Execution Flow: Agentic Billing Review System
 
 **Project:** Meridian Atlas Partners — Coastal Greenway (PRJ-NS-7421)  
-**Last updated:** 2026-06-18 (Phase 3 complete)
+**Last updated:** 2026-06-18 (Phase 4 complete)
 
 This document describes what happens step-by-step when a submission file enters the system, how each phase transforms the data, and what flows into the next phase.
 
@@ -76,7 +76,7 @@ _handle(submission)
   │     ├─► [Phase 1]  load_inputs()
   │     ├─► [Phase 2/3]  rule_engine.run()         ← wired
   │     ├─► [Phase 3]  matcher.reconcile()        ← wired
-  │     ├─► [Phase 4]  detector.run()             ← stub today
+  │     ├─► [Phase 4]  detector.run()             ← wired
   │     ├─► [Phase 5]  invoice_builder.build()    ← stub today
   │     └─► [Phase 6]  supervisor.run()           ← stub today
   ├─► shutil.move(processing/ → completed/__timestamp__.csv)
@@ -299,43 +299,54 @@ reconcile(inputs, rule_results)
 
 ---
 
-## Phase 4 — Exception Detection & Triage  *(not yet built)*
+## Phase 4 — Exception Detection & Triage  ✅ Complete
 
-**Entry point:** `detector.run(inputs, rule_results, match_results)` in `billing_agent/exceptions/detector.py`  
-**Input:** `IngestionResult` + Phase 2 + Phase 3 outputs  
-**Output:** `ExceptionReport` containing all flagged items with resolution status
+**Entry point:** `run(inputs, rule_results, match_results)` in `billing_agent/exceptions/detector.py`  
+**Input:** `IngestionResult` + `List[RuleResult]` from Phase 2/3  
+**Output:** `ExceptionReport` — all exceptions classified by routing and blocking status
 
-### Execution steps (planned)
+### Execution steps
 
 ```
 detector.run(inputs, rule_results, match_results)
   │
-  ├─1─ aggregate all flagged RuleResults (status != APPROVE)
-  │
-  ├─2─ for each exception:
-  │      ├─ already resolved by override_resolver in Phase 2?
-  │      │    → status = AUTO_RESOLVED, source = PL email / prior pattern
-  │      └─ unresolved?
-  │           → status = ESCALATE
-  │                route = ANALYST   (judgment call needed: AMOUNT_MISMATCH, COMPOSITE)
-  │                route = EMPLOYEE  (correction needed in SAP: MISCODED_LABOUR, MISSING_BACKUP)
-  │                route = PL        (approval needed: OVER_CAP without precedent)
-  │
-  ├─3─ triage summary
-  │      count by exception_type and route
-  │      flag any exceptions that block invoice (ALCOHOL, MISSING_BACKUP unresolved)
-  │
-  └─4─ update Decision Memory store
-         write new exception + resolution to resolutions.csv (recurring patterns only)
+  └─► for each RuleResult:
+        │
+        ├─ status=APPROVE, override_applied=False
+        │    → clean_count += 1  (no exception, no action)
+        │
+        ├─ status=APPROVE, override_applied=True
+        │    → auto_resolved[]  (was FLAG/HOLD; PL or prior-exception resolved it)
+        │      routing = AUTO_RESOLVED
+        │
+        ├─ status=REJECT, override_applied=True
+        │    → pl_rejections[]  (PL explicitly rejected this line)
+        │      routing = AUTO_RESOLVED
+        │
+        ├─ status=REJECT, override_applied=False
+        │    → hard_rejections[]  (contract violation: alcohol, lounge, personal, miscoded)
+        │      routing = _route(rule_id)  → EMPLOYEE
+        │
+        └─ status=FLAG or HOLD (unresolved)
+             routing = _route(rule_id):
+               ANALYST  ← AMOUNT_MISMATCH, RATE_MISMATCH, CURRENCY, COMPOSITE_DOC, MARKUP_MISSING, ...
+               PL       ← LODGING_CAP, MEAL_CAP, PER_DIEM_CAP, HOLD_ITEM
+               EMPLOYEE ← NO_RECEIPT, UNREADABLE_DOC, MISCODED, ALCOHOL, ...
+             blocks_invoice = rule_id in _BLOCKING_RULES
+             → escalate_analyst[] / escalate_pl[] / escalate_employee[]
 
   returns ExceptionReport{
-    auto_resolved: List[Exception],    applied known rule/pattern
-    escalate_analyst: List[Exception], needs human judgment
-    escalate_employee: List[Exception],needs SAP correction → re-trigger
-    escalate_pl: List[Exception],      needs PL approval
-    blocking: List[Exception]          prevents invoice generation
+    clean_count, auto_resolved[], pl_rejections[], hard_rejections[],
+    escalate_analyst[], escalate_employee[], escalate_pl[],
+    .blocking   → computed: unresolved items where blocks_invoice=True
+    .unresolved_count → len(analyst) + len(employee) + len(pl)
   }
 ```
+
+**Blocking items** (cannot appear on draft invoice without resolution):
+`LODGING_CAP`, `MEAL_CAP`, `PER_DIEM_CAP`, `HOLD_ITEM`, `NO_RECEIPT`, `UNREADABLE_DOC`, `CURRENCY`, `MARKUP_MISSING`
+
+`AMOUNT_MISMATCH` is not blocking — analyst can approve the receipt amount while SAP discrepancy is investigated.
 
 ---
 
