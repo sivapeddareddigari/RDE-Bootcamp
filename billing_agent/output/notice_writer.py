@@ -17,7 +17,7 @@ activity triggered separately via billing_agent/invoice_run.py.
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from billing_agent import run_logger
 from billing_agent.config import OUTPUT_DIR
@@ -69,9 +69,15 @@ def write_notices(
     rule_results: List[RuleResult],
     exception_report: ExceptionReport,
     contacts: ContactDirectory,
+    llm_texts: Optional[Dict[str, str]] = None,
 ) -> List[Path]:
     """
     Write per-employee exception notices and an analyst summary.
+
+    llm_texts: optional dict mapping transaction_id → LLM-generated employee notice
+    text. When present, the LLM text replaces the generic _ACTION template for that
+    transaction. Provided by the Phase 6 exception agent.
+
     Returns paths to all files written (notices + summary).
     """
     ts   = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -81,6 +87,7 @@ def write_notices(
     notices_dir = OUTPUT_DIR / "notices"
     notices_dir.mkdir(parents=True, exist_ok=True)
 
+    llm = llm_texts or {}
     written: List[Path] = []
 
     # ── Per-employee exception notices ────────────────────────────────────────
@@ -91,7 +98,7 @@ def write_notices(
         if not items:
             continue                      # clean employee — no notice needed
         path = notices_dir / f"exception-notice-{emp_id}-{stem}__{ts}.md"
-        _write_employee_notice(path, emp_id, emp, items, inputs, ts)
+        _write_employee_notice(path, emp_id, emp, items, inputs, ts, llm)
         written.append(path)
         log.info("  notice → %s", path.name)
 
@@ -128,6 +135,7 @@ def _write_employee_notice(
     items: List[ExceptionItem],
     inputs: IngestionResult,
     ts: str,
+    llm_texts: Optional[Dict[str, str]] = None,
 ) -> None:
     name  = emp.name if emp else employee_id
     email = emp.email if emp else "—"
@@ -160,7 +168,7 @@ def _write_employee_notice(
         w("")
         w("These charges **cannot appear on the client invoice** until resolved.")
         w("")
-        _item_table(lines, blocking)
+        _item_table(lines, blocking, llm_texts or {})
         w("")
 
     if non_blocking:
@@ -169,7 +177,7 @@ def _write_employee_notice(
         w("These items are being reviewed by the billing analyst or Project Lead. "
           "No action required from you unless contacted separately.")
         w("")
-        _item_table(lines, non_blocking)
+        _item_table(lines, non_blocking, llm_texts or {})
         w("")
 
     w("---")
@@ -180,12 +188,17 @@ def _write_employee_notice(
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def _item_table(lines: List[str], items: List[ExceptionItem]) -> None:
+def _item_table(
+    lines: List[str],
+    items: List[ExceptionItem],
+    llm_texts: Dict[str, str],
+) -> None:
     w = lines.append
     w("| Transaction | Description | Amount (USD) | Issue | Action required |")
     w("|-------------|-------------|-------------:|-------|-----------------|")
     for item in items:
-        action = _action(item.rule_id, item.note)
+        # LLM-generated text takes precedence over the generic template
+        action = llm_texts.get(item.transaction_id) or _action(item.rule_id, item.note)
         w(f"| {item.transaction_id} | {item.description[:45]} "
           f"| {item.original_amount:,.2f} | {item.note[:60]} | {action} |")
 

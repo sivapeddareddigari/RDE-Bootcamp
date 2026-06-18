@@ -21,13 +21,9 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from billing_agent.ingestion import load_inputs
 from billing_agent.ingestion.contacts_loader import load_contacts
 from billing_agent import run_logger
-from billing_agent.rules import rule_engine
-from billing_agent.matching import reconcile
-from billing_agent.exceptions import run as detect_exceptions
-from billing_agent.output import write_notices
+from billing_agent.agents.supervisor import run as supervisor_run
 from billing_agent.config import (
     ACCEPTED_EXTENSIONS,
     COMPLETED_DIR,
@@ -56,11 +52,13 @@ _contacts = load_contacts()
 
 def process_submission(submission_path: Path) -> None:
     """
-    Orchestrates the per-submission billing review pipeline.
+    Orchestrates the per-submission billing review pipeline via the Phase 6
+    Supervisor Agent.
 
-    Phases 1–4 evaluate the employee's transactions and detect exceptions.
-    Phase 5 writes exception notices to each affected employee and an
-    aggregate summary to the billing analyst.
+    The supervisor runs a Claude tool-use loop that:
+      Phases 1–4 — ingestion, rule engine, document matching, exception detection
+      Phase 5a   — employee exception notices + analyst summary
+      Phase 6    — LLM exception reasoning (contextual notice text, auto-resolve check)
 
     The project-level draft invoice is NOT produced here — that is a
     month-end activity run separately via:
@@ -69,23 +67,7 @@ def process_submission(submission_path: Path) -> None:
     run_logger.init_run(submission_path.name)
     run_logger.step(f"Submission received — {submission_path.name}", "info")
 
-    run_logger.step("Phase 1 — loading all inputs", "info")
-    inputs = load_inputs(submission_path)
-
-    run_logger.step("Phase 2/3 — rule engine", "info")
-    rule_results = rule_engine.run(inputs)
-
-    run_logger.step("Phase 3 — document matching & reconciliation", "info")
-    match_results = reconcile(inputs, rule_results)
-
-    run_logger.step("Phase 4 — exception detection & triage", "info")
-    exception_report = detect_exceptions(inputs, rule_results, match_results)
-
-    run_logger.step("Phase 5 — employee notices & analyst summary", "info")
-    write_notices(inputs, rule_results, exception_report, _contacts)
-
-    run_logger.step("Phase 6 — supervisor agent reasoning", "info")
-    # TODO Phase 6 — agents.supervisor.run(inputs, exception_report, _contacts)
+    supervisor_run(submission_path, _contacts)
 
     run_logger.step("Pipeline complete", "ok")
     # run_logger.close_run() is called by _handle after the file is safely archived

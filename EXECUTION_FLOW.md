@@ -99,8 +99,7 @@ _handle(submission)
   │     ├─► [Phase 2/3]  rule_engine.run()         ← wired
   │     ├─► [Phase 3]  matcher.reconcile()        ← wired
   │     ├─► [Phase 4]  detector.run()             ← wired
-  │     ├─► [Phase 5a] notice_writer.write_notices() ← wired (employee notices + analyst summary)
-  │     └─► [Phase 6]  supervisor.run()           ← stub today
+  │     │     └─► [Phase 6]  supervisor_run(submission_path, contacts)  ← wired
   ├─► shutil.move(processing/ → completed/__timestamp__.csv)
   └─► run_logger.close_run(success=True)          seal log after file is safely archived
 
@@ -497,47 +496,55 @@ invoice_builder.build(project_id, billing_month, contacts, submissions_dir)
 
 ---
 
-## Phase 6 — Agentic Orchestration  *(not yet built)*
+## Phase 6 — Agentic Orchestration  *(complete)*
 
-**Entry point:** `supervisor.run(submission_path)` in `billing_agent/agents/supervisor.py`  
-**Replaces:** The linear stub calls in `process_submission()` with an LLM-driven loop
+**Entry point:** `supervisor.run(submission_path, contacts)` in `billing_agent/agents/supervisor.py`  
+**Model:** `claude-haiku-4-5-20251001` for both agents (fast, cost-efficient)  
+**Fallback:** If the Anthropic API is unavailable both agents fall back gracefully (no crash)
 
-### Execution steps (planned)
+### Execution steps
 
 ```
-supervisor.run(submission_path)
+supervisor.run(submission_path, contacts)
   │
-  ├─1─ Billing Supervisor Agent (Claude API)
-  │      model: claude-sonnet-4-6
-  │      tools: [load_inputs, run_rules, match_docs, detect_exceptions,
-  │              build_invoice, get_pl_instructions, write_audit_trail]
-  │      system_prompt: BILLING_SUPERVISOR_SYSTEM_PROMPT
-  │      │
-  │      └─► agent decides tool call order based on what it sees
-  │            → calls load_inputs()     → IngestionResult
-  │            → calls run_rules()       → List[RuleResult]
-  │            → calls match_docs()      → List[MatchResult]
-  │            → calls detect_exceptions()
-  │                  │
-  │                  └─► if unresolved exceptions present:
-  │                        Exception Reasoning Agent (nested call)
-  │                          tools: [query_decision_memory, query_instruction_store,
-  │                                  search_prior_exceptions]
-  │                          → returns { auto_resolved, escalate }
-  │            → calls build_invoice()   → output files
+  ├─ Claude tool-use loop (max 10 iterations)
+  │    system prompt: always run pipeline first; only call exception agent if has_unresolved;
+  │                   always write notices last; don't call any tool more than once
   │
-  ├─2─ Re-trigger loop
-  │      if escalate_employee is non-empty:
-  │        → notify employee via Teams/email (out of scope for MVP)
-  │        → employee corrects in SAP
-  │        → drops corrected CSV into incoming/
-  │        → full pipeline re-runs from Phase 1
-  │        → already-resolved tx_ids skipped (idempotency by tx_id tracking)
+  │    Turn 1 → tool: run_pipeline_phases_1_to_4(submission_path)
+  │              → load_inputs() + rule_engine.run() + reconcile() + detect_exceptions()
+  │              → state[run_id] stored in memory for subsequent turns
+  │              → returns JSON: {run_id, total_transactions, unresolved_count, has_unresolved}
   │
-  └─3─ Knowledge store updates
-         Decision Memory: new resolution → append to resolutions.csv (recurring=Y if PL confirms)
-         Instruction Store: new PL preference → append to sample-emails.md equivalent
+  │    Turn 2 (if has_unresolved) → tool: analyse_unresolved_exceptions(run_id)
+  │              → Exception Reasoning Agent (single-turn, structured output)
+  │                    context: PL instructions + relevant prior cases + contract clauses (12)
+  │                    → List[ExceptionAnalysis] (one per unresolved item)
+  │                    → each: recommendation, routing, reasoning,
+  │                             employee_notice_text, analyst_note
+  │                    fallback → [] (template notices used instead)
+  │
+  │    Turn 3 → tool: write_notices_and_summary(run_id, use_llm_text=true)
+  │              → notice_writer.write_notices(inputs, rr, er, contacts, llm_texts={…})
+  │              → llm_texts dict: tx_id → employee_notice_text (overrides _ACTION template)
+  │              → writes exception-notice-*.md (per employee) + analyst-summary-*.md
+  │
+  │    Turn 4 → end_turn (supervisor writes one-sentence summary)
+  │
+  └─ fallback path (API unavailable):
+       _direct_fallback() → deterministic pipeline → template notices
+       result.analyses = [], result.auto_resolved_by_llm = 0
 ```
+
+### Return type: `SupervisorResult`
+| Field | Type | Description |
+|-------|------|-------------|
+| `inputs` | `IngestionResult` | All ingested data for this submission |
+| `rule_results` | `List[RuleResult]` | Rule engine output |
+| `exception_report` | `ExceptionReport` | All exception items |
+| `analyses` | `List[ExceptionAnalysis]` | LLM analysis (empty if API unavailable) |
+| `notices_written` | `List[Path]` | Paths to all output files written |
+| `auto_resolved_by_llm` | `int` | Count of items the LLM marked AUTO_RESOLVE |
 
 ---
 

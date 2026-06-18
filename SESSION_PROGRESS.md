@@ -3,7 +3,7 @@
 **Project:** Meridian Atlas Partners — RDE Bootcamp  
 **Repo:** https://github.com/sivapeddareddigari/RDE-Bootcamp  
 **Active branch:** `develop`  
-**Last updated:** 2026-06-18 (Phase 5 redesign complete)
+**Last updated:** 2026-06-18 (Phase 6 agentic orchestration complete)
 
 ---
 
@@ -40,10 +40,10 @@ python3 -m pytest tests/ -v
 | Phase 3 | Rule engine, document matching, override resolution | ✅ Done | `1ca6104` |
 | Phase 4 | Exception detection & triage | ✅ Done | `65c3366` |
 | Phase 5 | Employee notices + analyst summary (per-submission) + project invoice (month-end CLI) | ✅ Done | HEAD |
-| Phase 6 | Agentic orchestration (Claude API) | ⏳ Next | — |
-| Phase 7 | Testing | 🔄 In progress | HEAD |
+| Phase 6 | Agentic orchestration (Claude API) | ✅ Done | HEAD |
+| Phase 7 | Testing | ✅ Done | HEAD |
 
-**Test suite:** 215 tests, all passing. Run: `python3 -m pytest tests/ -v`
+**Test suite:** 241 tests, all passing. Run: `python3 -m pytest tests/ -v`
 
 ---
 
@@ -91,7 +91,7 @@ Re-reads all completed submission CSVs for the project+month, re-runs Phases 1�
 billing_agent/
 ├── __init__.py
 ├── config.py                   # paths, FX_RATES (only contract value here), watcher config
-├── main.py                     # drop-folder watcher; Phases 1–5a wired; Phase 6 TODO stub
+├── main.py                     # drop-folder watcher; calls supervisor_run() (Phase 6)
 ├── invoice_run.py              # month-end CLI — --project + --month args
 ├── run_logger.py               # append-mode output/billing_agent.log
 ├── models/
@@ -128,9 +128,17 @@ billing_agent/
 │   ├── __init__.py             # re-exports ExceptionItem, ExceptionReport, run
 │   ├── models.py               # ExceptionItem, ExceptionReport dataclasses
 │   └── detector.py             # run() → ExceptionReport
+├── stores/
+│   ├── __init__.py             # re-exports find_relevant, format_for_prompt, load_memory
+│   ├── decision_memory.py      # load_memory() → List[ExceptionCase]; find_relevant(); format_for_prompt()
+│   └── instruction_store.py    # format_for_prompt(List[ProjectInstruction]) → prompt string
+├── agents/
+│   ├── __init__.py             # re-exports run, SupervisorResult, ExceptionAnalysis
+│   ├── exception_agent.py      # single-turn Claude call → List[ExceptionAnalysis]; fallback → []
+│   └── supervisor.py           # tool-use loop → SupervisorResult; fallback → deterministic pipeline
 └── output/
     ├── __init__.py             # re-exports BuildResult, build, write_notices
-    ├── notice_writer.py        # write_notices() → employee notices + analyst summary
+    ├── notice_writer.py        # write_notices(llm_texts=…) → employee notices + analyst summary
     └── invoice_builder.py      # build() → project-level invoice + audit + exceptions
 
 tests/
@@ -139,7 +147,8 @@ tests/
 ├── test_doc_parser.py          # 25 tests
 ├── test_loader.py              # 34 tests
 ├── test_sync_rules.py          # 79 tests
-└── test_invoice_builder.py     # 55 tests (contacts loader, notice writer, invoice builder, helpers)
+├── test_invoice_builder.py     # 55 tests (contacts loader, notice writer, invoice builder, helpers)
+└── test_phase6.py              # 26 tests (stores, exception agent, supervisor, notice writer LLM path)
 
 test-data/sample-inputs/
 ├── submissions/                # 6 per-employee scenario CSVs
@@ -327,43 +336,43 @@ class ContactDirectory:
 
 ---
 
-## What's Next — Phase 6
+## Phase 6 — Agentic Orchestration (Done)
 
-**Goal:** Wrap the deterministic pipeline with two LLM agents.
+### Architecture
 
-### Files to create
-- `billing_agent/agents/supervisor.py` — Billing Supervisor Agent (Claude API)
-- `billing_agent/agents/exception_agent.py` — Exception Reasoning Agent
-- `billing_agent/stores/decision_memory.py` — pattern library (R/W resolutions.csv)
-- `billing_agent/stores/instruction_store.py` — PL rules per project
+Two agents, both using `claude-haiku-4-5-20251001`, with graceful fallback to the deterministic pipeline when the Anthropic API is unavailable.
 
-### Billing Supervisor skeleton
-```python
-import anthropic
+#### Supervisor Agent (`billing_agent/agents/supervisor.py`)
+- Entry point: `run(submission_path, contacts) → SupervisorResult`
+- Claude tool-use loop (max 10 iterations) with three tools:
+  1. `run_pipeline_phases_1_to_4` — ingestion + rules + matching + exception detection
+  2. `analyse_unresolved_exceptions` — calls Exception Reasoning Agent (only if `has_unresolved`)
+  3. `write_notices_and_summary` — employee notices + analyst summary (with or without LLM text)
+- Fallback: `except Exception` → `_direct_fallback()` runs deterministic pipeline directly
 
-client = anthropic.Anthropic()
+#### Exception Reasoning Agent (`billing_agent/agents/exception_agent.py`)
+- Single-turn structured-output call (no tools)
+- Context: PL instructions + relevant prior resolutions + contract clauses (first 12)
+- Output: `List[ExceptionAnalysis]` — one per unresolved item
+- Each `ExceptionAnalysis`: `recommendation` (AUTO_RESOLVE/ESCALATE), `routing`, `reasoning`, `employee_notice_text`, `analyst_note`
+- Hard rules in system prompt: ALCOHOL/PERSONAL_ITEM/AIRPORT_LOUNGE always ESCALATE
+- Fallback: `except Exception` → returns `[]` (template text used in notices)
 
-def run(submission_path: Path) -> None:
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=4096,
-        tools=[
-            load_inputs_tool,
-            run_rule_check_tool,
-            match_documents_tool,
-            detect_exceptions_tool,
-            write_notices_tool,
-        ],
-        system=BILLING_SUPERVISOR_SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": f"Process submission: {submission_path}"}],
-    )
-```
+#### Stores
+- `decision_memory.py`: wraps `resolutions.csv`, maps rule_ids → exception_types, returns recurring patterns
+- `instruction_store.py`: formats PL instructions for LLM prompt context
 
-### Exception Reasoning Agent
-- Invoked only when `exception_report.unresolved_count > 0`
-- Reads Decision Memory + Instruction store
-- Returns `{"auto_resolved": [...], "escalate": [...]}`
-- Novel exceptions → flag to employee via notice → re-trigger loop (idempotent by tx_id)
+### API Key Resolution
+Both agents call `_resolve_api_key()` which checks:
+1. `ANTHROPIC_API_KEY` env var
+2. `.claude/settings.local.json` → `env.ANTHROPIC_API_KEY`
+3. `~/.claude/settings.local.json` → same
+4. `~/.claude/settings.json` → same
+
+If no key found: graceful fallback (no crash).
+
+### notice_writer.py changes
+`write_notices()` now accepts `llm_texts: Optional[Dict[str, str]]` — maps `transaction_id` → LLM-generated notice text. When provided, replaces the generic `_ACTION` template strings in the exception item table.
 
 ---
 
