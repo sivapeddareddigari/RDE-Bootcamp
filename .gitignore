@@ -11,7 +11,8 @@ build/
 Thumbs.db
 *.Zone.Identifier
 *.tmp
-output/
+output/*
+!output/billing_agent.log
 
 # submissions runtime contents — keep folder structure, ignore files
 submissions/incoming/*
