@@ -9,25 +9,74 @@
 
 ## Progress Tracker
 
-| Phase | Description | Status | Commit |
-|-------|-------------|--------|--------|
-| Trigger | Drop folder watcher | **Done** | `10eea00` |
-| Phase 1 | Scaffolding & ingestion | **Done** | `(current)` |
-| Phase 2 | Rule engine | Pending | — |
-| Phase 3 | Matching & reconciliation | Pending | — |
-| Phase 4 | Exception detection & triage | Pending | — |
-| Phase 5 | Invoice builder & outputs | Pending | — |
-| Phase 6 | Agentic orchestration (Claude API) | Pending | — |
-| Phase 7 | Testing | Pending | — |
+| Phase | Description | Status | Commit(s) |
+|-------|-------------|--------|-----------|
+| Trigger | Drop folder watcher | ✅ Done | `e078864` |
+| Phase 1 | Scaffolding & ingestion | ✅ Done | `e078864` → `624b1d5` |
+| Phase 2 | Rule engine | ⏳ Pending | — |
+| Phase 3 | Matching & reconciliation | ⏳ Pending | — |
+| Phase 4 | Exception detection & triage | ⏳ Pending | — |
+| Phase 5 | Invoice builder & outputs | ⏳ Pending | — |
+| Phase 6 | Agentic orchestration (Claude API) | ⏳ Pending | — |
+| Phase 7 | Testing | 🔄 In Progress | `624b1d5` |
 
-**Phase 1 ingestion results (verified against test data):**
-- 50 transactions loaded (23 labour, 27 expense, 3 held)
-- 23 timecard entries
-- 15 backup documents (receipts, mileage logs, vendor invoices)
-- 6 rate table entries
-- 18 contract clauses
-- 5 PL email instructions
-- 10 prior exception cases
+---
+
+## Phase 1 — Completed Work
+
+### What was built
+
+| Component | Description | Commit |
+|-----------|-------------|--------|
+| Data models | `Transaction`, `TimecardEntry`, `ReceiptDocument`, `ContractClause`, `ProjectInstruction`, `ExceptionCase` | `e078864` |
+| Drop-folder watcher | Polls `submissions/incoming/` every 5s; state machine `incoming → processing → completed/failed` | `e078864` |
+| Ingestion pipeline | `load_inputs()` returns `IngestionResult` with all 6 data sources | `e078864` |
+| Crash recovery | Retry counter baked into filename (`__r1`, `__r2`, `__r3`); quarantine after `MAX_RETRIES=3` | `fe14a25` |
+| Run logger | Single append-mode `output/billing_agent.log`; per-line filename tag; run header + footer | `e877433` |
+| Foreign currency | Regex extracts CAD/EUR/GBP etc. from receipt code blocks; `FX_RATES` in config | `fe14a25` |
+| Scoped loading | Timecards filtered to employees in submission; documents filtered to IDs in note fields | `624b1d5` |
+| 9 defect fixes | Word-boundary regex, alcohol amount extraction, SAP whitespace stripping, timecard path derivation | `fe14a25` |
+| Test data | 6 per-employee submission CSVs covering all exception scenarios | `a537867` |
+
+### Ingestion results (per-employee scoped loads)
+
+| Submission | Transactions | Timecards loaded | Documents loaded |
+|------------|-------------|-----------------|-----------------|
+| E-1041 clean | 7 (2 labour, 5 expense) | 6 (E-1041 only) | 3 (RC-001, RC-003, ML-001) |
+| E-2210 over-cap/alcohol | 7 (2 labour, 5 expense) | 6 (E-2210 only) | 2 (RC-012, RC-013) |
+| E-3055 hold/miscoded | 6 (3 labour, 2 expense, 1 parking) | varies (E-3055 only) | 1 (RC-021) |
+| E-4501 principal cap | 4 (2 labour, 2 expense) | varies (E-4501 only) | 0 (RC-031 not in store) |
+| E-7702 currency/personal | 6 (0 labour, 6 expense) | 0 (no timecards for E-7702) | 0 (RC-04x not in store) |
+| E-5102 subcon/composite | 6 (2 labour, 4 expense) | varies (E-5102 only) | 0 (RC-051/052, VI-003 not in store) |
+
+### Contract constants loaded
+
+- 6 role rate entries · 18 contract clauses · 5 PL email instructions · 10 prior exception cases
+
+---
+
+## Phase 7 — Testing (In Progress)
+
+### Unit tests — 81 tests, all passing (as of `624b1d5`)
+
+Run with: `python3 run_tests.py`  
+Results saved to: `output/Unit_test_runs/unit_test_run_<timestamp>.txt`  
+Summary logged to: `output/billing_agent.log`
+
+| Test file | Tests | Covers |
+|-----------|-------|--------|
+| `tests/test_sap_loader.py` | 22 | Transaction parsing (hold flags, currency, rate×qty arithmetic, labour/expense split); timecard employee filter |
+| `tests/test_doc_parser.py` | 25 | Document ID filtering; composite/unreadable/alcohol/currency/type detection; line item extraction |
+| `tests/test_loader.py` | 34 | `_referenced_doc_ids` helper; timecard scoping per submission; document scoping; static data always loaded |
+
+### Remaining test work (Phase 7 completion)
+
+| Test file | Status | Covers |
+|-----------|--------|--------|
+| `tests/test_rules.py` | ⏳ Not started | Each rule against known inputs |
+| `tests/test_matching.py` | ⏳ Not started | Doc-to-transaction linkage for all 12 complex cases |
+| `tests/test_currency.py` | ⏳ Not started | CAD→USD conversion for RC-015 |
+| `tests/test_invoice.py` | ⏳ Not started | End-to-end: 22 checkpoints against `expected-invoice.md` |
 
 ---
 
@@ -145,51 +194,83 @@ SAP draft invoice → Billing Analyst review → PFA review → PL approval → 
 
 ## Project Structure
 
+Legend: ✅ Built · ⏳ Planned
+
 ```
 billing_agent/
-├── main.py                        # Entry point / orchestrator trigger
-├── config.py                      # Paths, FX rates, constants
+├── main.py              ✅  Drop-folder watcher, crash recovery, retry logic
+├── config.py            ✅  Paths, FX rates, contract constants, MAX_RETRIES
+├── run_logger.py        ✅  Append-mode run log (output/billing_agent.log)
 ├── models/
-│   ├── transaction.py             # Transaction, Expense, LabourEntry dataclasses
-│   ├── document.py                # ReceiptDocument, VendorInvoice, MileageLog
-│   ├── contract.py                # ContractClause, RateTable
-│   └── instruction.py            # ProjectInstruction, ExceptionCase
+│   ├── transaction.py   ✅  Transaction, TimecardEntry dataclasses
+│   ├── document.py      ✅  ReceiptDocument (with alcohol_amount, currency)
+│   ├── contract.py      ✅  ContractClause, RateEntry
+│   └── instruction.py   ✅  ProjectInstruction, ExceptionCase
 ├── ingestion/
-│   ├── sap_loader.py              # Parse unbilled-2026-04.csv + timecards CSV
-│   ├── contract_parser.py         # Parse contract-001.md → ContractClause objects
-│   ├── doc_parser.py              # Parse RC-*/ML-*/VI-* markdown receipts
-│   ├── email_parser.py            # Parse sample-emails.md → ProjectInstruction list
-│   └── exception_loader.py       # Parse resolutions.csv → ExceptionCase list
-├── rules/
-│   ├── rule_engine.py             # Central rule dispatcher (priority-ordered)
-│   ├── lodging_rules.py           # $275 metro / $195 elsewhere caps
-│   ├── meal_rules.py              # $90/day receipt vs $65 per diem
-│   ├── travel_rules.py            # Economy/premium economy, mileage rate
-│   ├── labour_rules.py            # Principal cap, miscoded time, overtime
-│   └── subcontractor_rules.py    # 8% markup
-├── matching/
-│   ├── matcher.py                 # Link transactions → documents
-│   ├── id_normalizer.py           # Resolve employee/vendor IDs across sources
-│   └── currency.py                # FX conversion (CAD → USD at receipt date)
-├── exceptions/
-│   ├── detector.py                # Identify all exception types
-│   └── resolver.py                # Apply PL overrides & historical patterns
-├── stores/
-│   ├── decision_memory.py         # R/W pattern library (grows each cycle)
-│   └── instruction_store.py      # R/W PL rules per project
-├── agents/
-│   ├── supervisor.py              # LLM agent — orchestrates pipeline sequence
-│   └── exception_agent.py        # LLM agent — pattern lookup + novel case routing
-├── output/
-│   ├── invoice_builder.py         # Assemble final invoice lines
-│   ├── audit_trail.py             # Record per-line decision rationale
-│   └── report_generator.py       # Summary report, KPI dashboard
-└── tests/
-    ├── test_ingestion.py
-    ├── test_rules.py
-    ├── test_matching.py
-    ├── test_currency.py
-    └── test_invoice.py            # End-to-end against expected-invoice.md
+│   ├── loader.py        ✅  load_inputs() — scoped IngestionResult
+│   ├── sap_loader.py    ✅  load_transactions(), load_timecards(employee_ids)
+│   ├── contract_parser.py ✅ Parse contract-001.md → rates + clauses
+│   ├── doc_parser.py    ✅  load_documents(doc_ids) — filtered by note refs
+│   ├── email_parser.py  ✅  Parse sample-emails.md → ProjectInstruction list
+│   └── exception_loader.py ✅ Parse resolutions.csv → ExceptionCase list
+├── rules/               ⏳  (Phase 2)
+│   ├── rule_engine.py        Central rule dispatcher (priority-ordered)
+│   ├── lodging_rules.py      $275 metro / $195 elsewhere caps
+│   ├── meal_rules.py         $90/day receipt vs $65 per diem
+│   ├── travel_rules.py       Economy/premium economy, mileage rate
+│   ├── labour_rules.py       Principal cap, miscoded time, overtime
+│   └── subcontractor_rules.py  8% markup
+├── matching/            ⏳  (Phase 3)
+│   ├── matcher.py            Link transactions → documents
+│   ├── id_normalizer.py      Resolve employee/vendor IDs across sources
+│   └── currency.py           FX conversion (CAD → USD at receipt date)
+├── exceptions/          ⏳  (Phase 4)
+│   ├── detector.py           Identify all exception types
+│   └── resolver.py           Apply PL overrides & historical patterns
+├── stores/              ⏳  (Phase 6)
+│   ├── decision_memory.py    R/W pattern library (grows each cycle)
+│   └── instruction_store.py  R/W PL rules per project
+├── agents/              ⏳  (Phase 6)
+│   ├── supervisor.py         LLM agent — orchestrates pipeline sequence
+│   └── exception_agent.py    LLM agent — pattern lookup + novel case routing
+└── output/              ⏳  (Phase 5)
+    ├── invoice_builder.py    Assemble final invoice lines
+    ├── audit_trail.py        Record per-line decision rationale
+    └── report_generator.py   Summary report, KPI dashboard
+
+tests/                   🔄  (Phase 7 — in progress)
+├── conftest.py          ✅  Shared paths and submission fixture constants
+├── test_sap_loader.py   ✅  22 tests — transaction + timecard loading
+├── test_doc_parser.py   ✅  25 tests — document parsing and filtering
+├── test_loader.py       ✅  34 tests — scoped IngestionResult
+├── test_rules.py        ⏳  Rule engine (pending Phase 2)
+├── test_matching.py     ⏳  Doc-to-transaction linkage (pending Phase 3)
+├── test_currency.py     ⏳  CAD→USD conversion (pending Phase 3)
+└── test_invoice.py      ⏳  End-to-end 22-checkpoint suite (pending Phase 5)
+
+run_tests.py             ✅  Pytest runner — saves timestamped result files +
+                             appends pass/fail summary to billing_agent.log
+
+test-data/sample-inputs/
+├── transactions/
+│   ├── unbilled-2026-04.csv          Full cycle extract (50 transactions)
+│   └── test-exceptions-2026-05.csv  One of each exception type (15 rows)
+├── submissions/                      Per-employee scenario files (6 CSVs) ✅
+│   ├── submission-E1041-clean-2026-04.csv
+│   ├── submission-E2210-over-cap-alcohol-2026-04.csv
+│   ├── submission-E3055-hold-miscoded-2026-04.csv
+│   ├── submission-E4501-principal-cap-2026-04.csv
+│   ├── submission-E7702-currency-personal-2026-04.csv
+│   └── submission-E5102-subcontractor-composite-2026-04.csv
+├── documents/                        15 backup documents (RC-*, ML-*, VI-*)
+├── sap-outputs/                      timecards-2026-04.csv
+├── contracts/                        contract-001.md
+├── pm-instructions/                  sample-emails.md
+└── prior-exceptions/                 resolutions.csv
+
+output/
+├── billing_agent.log                 Append-mode run log (all submissions + test runs)
+└── Unit_test_runs/                   Timestamped test result files (one per run)
 ```
 
 ---
@@ -211,15 +292,16 @@ billing_agent/
 
 ### 1.2 Loaders
 
-| Loader | Input file | Output |
-|--------|-----------|--------|
-| `sap_loader.py` | `unbilled-2026-04.csv` + `timecards-2026-04.csv` | `List[Transaction]`, `List[TimecardEntry]` |
-| `contract_parser.py` | `contract-001.md` | `List[ContractClause]` |
-| `doc_parser.py` | All `RC-*`, `ML-*`, `VI-*` files | `List[ReceiptDocument]` |
-| `email_parser.py` | `sample-emails.md` | `List[ProjectInstruction]` |
-| `exception_loader.py` | `resolutions.csv` | `List[ExceptionCase]` |
+| Loader | Input file | Output | Scoped? |
+|--------|-----------|--------|---------|
+| `sap_loader.load_transactions()` | Dropped submission CSV | `List[Transaction]` | ✅ Submission only |
+| `sap_loader.load_timecards()` | `timecards-YYYY-MM.csv` (cycle-derived) | `List[TimecardEntry]` | ✅ Employees in submission |
+| `contract_parser.py` | `contract-001.md` | `List[ContractClause]`, `List[RateEntry]` | — (static ref) |
+| `doc_parser.load_documents()` | `documents/` directory | `List[ReceiptDocument]` | ✅ Doc IDs in note fields |
+| `email_parser.py` | `sample-emails.md` | `List[ProjectInstruction]` | — (static ref) |
+| `exception_loader.py` | `resolutions.csv` | `List[ExceptionCase]` | — (static ref) |
 
-**Input counts:** 52 transactions, 23 timecards, 19 backup documents, 5 PL emails, 11 historical patterns.
+**Typical scoped load:** 5–8 transactions · 3–8 timecards · 0–3 documents · 18 clauses · 6 rates · 5 instructions · 10 exceptions
 
 ---
 
