@@ -160,24 +160,55 @@ def _write_employee_notice(
       "month-end invoice to the client. Please action the items below in SAP and resubmit.")
     w("")
 
-    blocking = [i for i in items if i.blocks_invoice]
-    non_blocking = [i for i in items if not i.blocks_invoice]
+    emp_blocking     = [i for i in items if i.routing == "EMPLOYEE" and i.blocks_invoice]
+    emp_non_blocking = [i for i in items if i.routing == "EMPLOYEE" and not i.blocks_invoice]
+    pl_items         = [i for i in items if i.routing == "PL"]
+    analyst_items    = [i for i in items if i.routing == "ANALYST"]
+    rejection_items  = [i for i in items if i.routing not in ("EMPLOYEE", "PL", "ANALYST")]
 
-    if blocking:
-        w(f"## ⚠ Blocking items ({len(blocking)}) — must be resolved before invoicing")
+    if emp_blocking:
+        w(f"## ⚠ Action required — blocking items ({len(emp_blocking)})")
         w("")
-        w("These charges **cannot appear on the client invoice** until resolved.")
+        w("These charges **cannot appear on the client invoice** until you resolve them. "
+          "Please complete the action below in SAP and resubmit **before month-end**.")
         w("")
-        _item_table(lines, blocking, llm_texts or {})
+        _item_table(lines, emp_blocking, llm_texts or {})
         w("")
 
-    if non_blocking:
-        w(f"## Items under review ({len(non_blocking)}) — analyst or PL action in progress")
+    if emp_non_blocking:
+        w(f"## Action required — please correct and resubmit ({len(emp_non_blocking)})")
         w("")
-        w("These items are being reviewed by the billing analyst or Project Lead. "
-          "No action required from you unless contacted separately.")
+        w("These items will not hold the invoice, but they are flagged and **will not be billed "
+          "to the client** in their current state. Please correct in SAP and resubmit.")
         w("")
-        _item_table(lines, non_blocking, llm_texts or {})
+        _item_table(lines, emp_non_blocking, llm_texts or {})
+        w("")
+
+    if pl_items:
+        w(f"## PL approval required ({len(pl_items)})")
+        w("")
+        w("These items exceed a policy threshold and require written Project Lead approval "
+          "to appear on the invoice. You may also correct the SAP entry to bring it within "
+          "policy — either path resolves the flag.")
+        w("")
+        _item_table(lines, pl_items, llm_texts or {})
+        w("")
+
+    if analyst_items:
+        w(f"## Under analyst review ({len(analyst_items)})")
+        w("")
+        w("The billing analyst is reviewing these items. No action is required from you "
+          "right now — you will be contacted if anything further is needed.")
+        w("")
+        _item_table(lines, analyst_items, llm_texts or {})
+        w("")
+
+    if rejection_items:
+        w(f"## Rejected items ({len(rejection_items)})")
+        w("")
+        w("These charges have been removed from your claim and **will not appear on the invoice**.")
+        w("")
+        _item_table(lines, rejection_items, llm_texts or {})
         w("")
 
     w("---")

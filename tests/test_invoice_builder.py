@@ -177,8 +177,8 @@ class TestNoticeWriter:
     def test_notice_shows_blocking_section(self, clean):
         _, _, _, _, written = clean
         notice = next(p for p in written if "exception-notice" in p.name)
-        # TX-1006 (NO_RECEIPT) is blocking
-        assert "Blocking" in notice.read_text()
+        # TX-1006 (NO_RECEIPT) is blocking — section header uses lower-case "blocking items"
+        assert "blocking items" in notice.read_text()
 
     def test_over_cap_two_notices_written(self, over_cap):
         # E-2210 has hard rejections (ALCOHOL, MISCODED) → notice
