@@ -62,6 +62,11 @@ def send_submission_emails(
 
     if sent:
         run_logger.step(f"Email — {sent} message(s) dispatched", "ok")
+    else:
+        run_logger.step(
+            "Email — 0 messages sent (check EMAIL_ENABLED / SMTP credentials in .env)",
+            "warn",
+        )
     return sent
 
 

@@ -91,7 +91,8 @@ class TestEmailConfig:
         for key in ("EMAIL_ENABLED", "SMTP_HOST", "SMTP_PORT",
                     "SMTP_USER", "SMTP_PASSWORD", "EMAIL_FROM_NAME", "EMAIL_FROM_ADDR"):
             monkeypatch.delenv(key, raising=False)
-        cfg = load_config()
+        with patch("billing_agent.email.config._load_dotenv"):
+            cfg = load_config()
         assert cfg.enabled is False
         assert cfg.host == "smtp.office365.com"
         assert cfg.port == 587
@@ -123,7 +124,8 @@ class TestEmailConfig:
     def test_from_addr_defaults_to_smtp_user(self, monkeypatch):
         monkeypatch.setenv("SMTP_USER", "agent@co.com")
         monkeypatch.delenv("EMAIL_FROM_ADDR", raising=False)
-        cfg = load_config()
+        with patch("billing_agent.email.config._load_dotenv"):
+            cfg = load_config()
         assert cfg.from_addr == "agent@co.com"
 
     def test_dotenv_file_is_loaded(self, monkeypatch, tmp_path):
