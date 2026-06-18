@@ -33,7 +33,7 @@ def load_config() -> EmailConfig:
     user = os.environ.get("SMTP_USER", "")
     return EmailConfig(
         enabled   = os.environ.get("EMAIL_ENABLED", "false").strip().lower() in ("true", "1", "yes"),
-        host      = os.environ.get("SMTP_HOST", "smtp.office365.com"),
+        host      = os.environ.get("SMTP_HOST", "smtp.gmail.com"),
         port      = int(os.environ.get("SMTP_PORT", "587")),
         user      = user,
         password  = os.environ.get("SMTP_PASSWORD", ""),

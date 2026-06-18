@@ -94,7 +94,7 @@ class TestEmailConfig:
         with patch("billing_agent.email.config._load_dotenv"):
             cfg = load_config()
         assert cfg.enabled is False
-        assert cfg.host == "smtp.office365.com"
+        assert cfg.host == "smtp.gmail.com"
         assert cfg.port == 587
 
     def test_enabled_true(self, monkeypatch):

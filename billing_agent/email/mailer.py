@@ -223,4 +223,5 @@ class _Mailer:
 
         except Exception as exc:
             log.warning("Email send failed (%s) — pipeline continues", exc)
+            run_logger.step(f"Email SMTP error: {exc}", "error")
             return False
