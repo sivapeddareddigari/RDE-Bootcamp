@@ -1,0 +1,7 @@
+transaction_id,project_id,task_code,transaction_date,type,employee_id,role_code,description,quantity,unit,rate,amount,currency,classification,hold_flag,hold_reason,note
+TX-2026-04-5001,PRJ-NS-7421,T-300,2026-04-14,LABOR,E-5102,ENG1,Drawing markup — structural review pass,8.0,HRS,145.00,1160.00,USD,STD-TM-NA-CIVIC,N,,
+TX-2026-04-5002,PRJ-NS-7421,T-300,2026-04-15,LABOR,E-5102,ENG1,CAD model revisions — foundation pier layout,6.0,HRS,145.00,870.00,USD,STD-TM-NA-CIVIC,N,,
+TX-2026-04-5003,PRJ-NS-7421,T-300,2026-04-14,EXPENSE,E-5102,,Subcontractor — drone aerial survey (NO MARKUP),1.0,EA,2400.00,2400.00,USD,STD-TM-NA-CIVIC,N,,Vendor invoice VI-003; 8% contract markup NOT applied — should be $2592.00
+TX-2026-04-5004,PRJ-NS-7421,T-300,2026-04-15,EXPENSE,E-5102,,Composite site receipt — fuel + tolls + parking,1.0,EA,189.45,189.45,USD,STD-TM-NA-CIVIC,N,,Receipt: RC-051; single scan covers 3 separate vendor charges (composite doc)
+TX-2026-04-5005,PRJ-NS-7421,T-300,2026-04-15,EXPENSE,E-5102,,Printing and reprographics — plan sets,1.0,EA,94.00,94.00,USD,STD-TM-NA-CIVIC,N,,Receipt: RC-052
+TX-2026-04-5006,PRJ-NS-7421,T-300,2026-04-14,EXPENSE,E-5102,,Specialty rebar anchor — site consumable,1.0,EA,47.80,47.80,USD,STD-TM-NA-CIVIC,N,,No receipt — vendor didn't provide; amount exceeds $25 threshold

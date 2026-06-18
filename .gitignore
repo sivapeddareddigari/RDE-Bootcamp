@@ -14,6 +14,9 @@ Thumbs.db
 output/*
 !output/billing_agent.log
 
+# local Claude Code settings (may contain tokens/PATs)
+.claude/settings.local.json
+
 # submissions runtime contents — keep folder structure, ignore files
 submissions/incoming/*
 submissions/processing/*

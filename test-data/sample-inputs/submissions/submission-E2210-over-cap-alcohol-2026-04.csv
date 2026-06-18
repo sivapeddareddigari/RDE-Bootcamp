@@ -1,0 +1,8 @@
+transaction_id,project_id,task_code,transaction_date,type,employee_id,role_code,description,quantity,unit,rate,amount,currency,classification,hold_flag,hold_reason,note
+TX-2026-04-2001,PRJ-NS-7421,T-600,2026-04-16,LABOR,E-2210,ENG3,Report drafting — phase 2 deliverable,6.5,HRS,230.00,1495.00,USD,STD-TM-NA-CIVIC,N,,
+TX-2026-04-2002,PRJ-NS-7421,T-200,2026-04-17,LABOR,E-2210,ENG3,Client presentation — stakeholder review,8.0,HRS,230.00,1840.00,USD,STD-TM-NA-CIVIC,N,,
+TX-2026-04-2003,PRJ-NS-7421,T-110,2026-04-16,EXPENSE,E-2210,,Hotel — 1 night metro (OVER metro cap $275),1.0,NIGHT,310.00,310.00,USD,STD-TM-NA-CIVIC,N,,Receipt: RC-012; no PL override on file
+TX-2026-04-2004,PRJ-NS-7421,T-110,2026-04-16,EXPENSE,E-2210,,Client working dinner (OVER meal cap $90),1.0,EA,118.00,118.00,USD,STD-TM-NA-CIVIC,N,,Receipt: RC-013; attendees: E-2210 + client rep
+TX-2026-04-2005,PRJ-NS-7421,T-110,2026-04-16,EXPENSE,E-2210,,Drinks at hotel bar — whisky and wine,1.0,EA,38.00,38.00,USD,STD-TM-NA-CIVIC,N,,Alcohol — non-reimbursable per contract §4.2
+TX-2026-04-2006,PRJ-NS-7421,T-110,2026-04-17,EXPENSE,E-2210,,Per diem — meals (within cap),1.0,DAY,65.00,65.00,USD,STD-TM-NA-CIVIC,N,,No receipt required (per diem rate)
+TX-2026-04-2007,PRJ-NS-7421,T-200,2026-04-17,EXPENSE,E-2210,,Internal training — Python refresher (MISCODED),3.0,HRS,230.00,690.00,USD,STD-TM-NA-CIVIC,N,,Training should not be billed to client project
