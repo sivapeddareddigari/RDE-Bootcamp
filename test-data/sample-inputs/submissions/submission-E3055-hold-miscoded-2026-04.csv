@@ -1,0 +1,7 @@
+transaction_id,project_id,task_code,transaction_date,type,employee_id,role_code,description,quantity,unit,rate,amount,currency,classification,hold_flag,hold_reason,note
+TX-2026-04-3001,PRJ-NS-7421,T-200,2026-04-10,LABOR,E-3055,PM1,Client status meeting — weekly progress review,1.5,HRS,215.00,322.50,USD,STD-TM-NA-CIVIC,N,,
+TX-2026-04-3002,PRJ-NS-7421,T-200,2026-04-10,LABOR,E-3055,PM1,PMO admin sync — internal pipeline alignment,0.5,HRS,215.00,107.50,USD,STD-TM-NA-CIVIC,Y,PRINCIPAL_APPROVAL_REQUIRED,Pending PL sign-off; admin call not yet approved for client billing
+TX-2026-04-3003,PRJ-NS-7421,T-900,2026-04-11,LABOR,E-3055,PM1,Internal training — project management methodology,2.0,HRS,215.00,430.00,USD,STD-TM-NA-CIVIC,N,,Training hours — should not be billed to client
+TX-2026-04-3004,PRJ-NS-7421,T-200,2026-04-10,EXPENSE,E-3055,,Client lunch — 3 attendees working session,1.0,EA,84.00,84.00,USD,STD-TM-NA-CIVIC,N,,Receipt: RC-021; attendees listed on back
+TX-2026-04-3005,PRJ-NS-7421,T-200,2026-04-11,EXPENSE,E-3055,,Drafting supplies — pens markers and templates,1.0,EA,67.30,67.30,USD,STD-TM-NA-CIVIC,N,,No receipt — lost; amount above $25 threshold
+TX-2026-04-3006,PRJ-NS-7421,T-200,2026-04-10,EXPENSE,E-3055,,Site parking — half day,1.0,EA,18.00,18.00,USD,STD-TM-NA-CIVIC,N,,Under $25; no receipt required

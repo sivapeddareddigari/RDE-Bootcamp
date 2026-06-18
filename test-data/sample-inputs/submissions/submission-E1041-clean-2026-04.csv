@@ -1,0 +1,8 @@
+transaction_id,project_id,task_code,transaction_date,type,employee_id,role_code,description,quantity,unit,rate,amount,currency,classification,hold_flag,hold_reason,note
+TX-2026-04-1001,PRJ-NS-7421,T-100,2026-04-01,LABOR,E-1041,ENG2,Site survey preparation,8.0,HRS,175.00,1400.00,USD,STD-TM-NA-CIVIC,N,,
+TX-2026-04-1002,PRJ-NS-7421,T-110,2026-04-02,LABOR,E-1041,ENG2,Site visit — coastal point A,8.0,HRS,175.00,1400.00,USD,STD-TM-NA-CIVIC,N,,
+TX-2026-04-1003,PRJ-NS-7421,T-110,2026-04-02,EXPENSE,E-1041,,Flight outbound — economy class,1.0,EA,412.80,412.80,USD,STD-TM-NA-CIVIC,N,,Receipt: RC-001
+TX-2026-04-1004,PRJ-NS-7421,T-110,2026-04-02,EXPENSE,E-1041,,Hotel — 1 night coastal (below metro cap),1.0,NIGHT,265.00,265.00,USD,STD-TM-NA-CIVIC,N,,Receipt: RC-003
+TX-2026-04-1005,PRJ-NS-7421,T-110,2026-04-02,EXPENSE,E-1041,,Dinner — charged to hotel folio,1.0,EA,72.40,72.40,USD,STD-TM-NA-CIVIC,N,,Receipt: RC-003 (room folio line item)
+TX-2026-04-1006,PRJ-NS-7421,T-110,2026-04-02,EXPENSE,E-1041,,Rideshare — hotel to site,1.0,EA,38.20,38.20,USD,STD-TM-NA-CIVIC,N,,Receipt: RC-004
+TX-2026-04-1007,PRJ-NS-7421,T-110,2026-04-01,EXPENSE,E-1041,,Mileage — home to airport (42 mi),42.0,MI,0.67,28.14,USD,STD-TM-NA-CIVIC,N,,Mileage log: ML-001

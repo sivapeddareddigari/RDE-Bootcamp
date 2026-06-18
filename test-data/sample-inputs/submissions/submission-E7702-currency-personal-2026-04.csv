@@ -1,0 +1,7 @@
+transaction_id,project_id,task_code,transaction_date,type,employee_id,role_code,description,quantity,unit,rate,amount,currency,classification,hold_flag,hold_reason,note
+TX-2026-04-7001,PRJ-NS-7421,T-110,2026-04-22,EXPENSE,E-7702,,Flight outbound — economy class,1.0,EA,402.10,402.10,USD,STD-TM-NA-CIVIC,N,,Receipt: RC-041
+TX-2026-04-7002,PRJ-NS-7421,T-110,2026-04-22,EXPENSE,E-7702,,Hotel — 1 night (OVER metro cap $275),1.0,NIGHT,310.00,310.00,USD,STD-TM-NA-CIVIC,N,,Receipt: RC-042; over both $275 metro and $195 other-location caps
+TX-2026-04-7003,PRJ-NS-7421,T-110,2026-04-22,EXPENSE,E-7702,,Transit pass — local subway book (CAD receipt),1.0,EA,52.00,52.00,CAD,STD-TM-NA-CIVIC,N,,Receipt: RC-043; charged in Canadian dollars — requires FX conversion
+TX-2026-04-7004,PRJ-NS-7421,T-110,2026-04-22,EXPENSE,E-7702,,Personal laundry — hotel dry cleaning,1.0,EA,28.00,28.00,USD,STD-TM-NA-CIVIC,N,,Personal item — non-reimbursable per policy §3.1
+TX-2026-04-7005,PRJ-NS-7421,T-110,2026-04-22,EXPENSE,E-7702,,Airport lounge access — Priority Pass upgrade,1.0,EA,55.00,55.00,USD,STD-TM-NA-CIVIC,N,,Personal comfort item — not reimbursable
+TX-2026-04-7006,PRJ-NS-7421,T-110,2026-04-23,EXPENSE,E-7702,,Per diem — meals return day,1.0,DAY,65.00,65.00,USD,STD-TM-NA-CIVIC,N,,No receipt required (per diem rate)

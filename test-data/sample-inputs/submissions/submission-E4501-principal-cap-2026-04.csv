@@ -1,0 +1,5 @@
+transaction_id,project_id,task_code,transaction_date,type,employee_id,role_code,description,quantity,unit,rate,amount,currency,classification,hold_flag,hold_reason,note
+TX-2026-04-4001,PRJ-NS-7421,T-500,2026-04-08,LABOR,E-4501,PRIN,Phase 2 technical review — within cap,2.0,HRS,320.00,640.00,USD,STD-TM-NA-CIVIC,N,,Principal cap: 2 hrs of 40 monthly = 5.0% (at limit)
+TX-2026-04-4002,PRJ-NS-7421,T-500,2026-04-08,LABOR,E-4501,PRIN,Strategy guidance — stakeholder alignment session,4.0,HRS,320.00,1280.00,USD,STD-TM-NA-CIVIC,Y,PRINCIPAL_CAP_EXCEEDED,PRIN role billed 6 hrs this month (15% of 40-hr month); contract cap 5%
+TX-2026-04-4003,PRJ-NS-7421,T-200,2026-04-08,EXPENSE,E-4501,,Workshop room rental — full day (AMOUNT MISMATCH),1.0,EA,485.00,485.00,USD,STD-TM-NA-CIVIC,N,,Vendor invoice VI-002 shows $490.00; SAP posted $485.00 — $5 shortfall
+TX-2026-04-4004,PRJ-NS-7421,T-200,2026-04-08,EXPENSE,E-4501,,AV equipment rental — projector and screen,1.0,EA,120.00,120.00,USD,STD-TM-NA-CIVIC,N,,Receipt: RC-031; separate from room rental on vendor invoice

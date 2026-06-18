@@ -1,0 +1,48 @@
+========================================================================
+RUN  unbilled-2026-04.csv  started 2026-06-18 02:41:52 UTC
+========================================================================
+2026-06-18 02:41:52  [unbilled-2026-04.csv]  →  Submission received — unbilled-2026-04.csv
+2026-06-18 02:41:52  [unbilled-2026-04.csv]  →  Phase 1 — loading all inputs
+2026-06-18 02:41:52  [unbilled-2026-04.csv]  ✓  Loaded 50 transactions (23 labour, 27 expense, 3 held)
+2026-06-18 02:41:52  [unbilled-2026-04.csv]  ✓  Loaded 23 timecard entries
+2026-06-18 02:41:52  [unbilled-2026-04.csv]  ✓  Loaded contract — 6 role rates, 18 expense clauses
+2026-06-18 02:41:52  [unbilled-2026-04.csv]  ✓  Loaded 15 backup documents (1 composite, 0 unreadable, 2 with alcohol)
+2026-06-18 02:41:52  [unbilled-2026-04.csv]  ✓  Loaded 5 PL instructions
+2026-06-18 02:41:52  [unbilled-2026-04.csv]  ✓  Loaded 10 prior exception patterns
+2026-06-18 02:41:52  [unbilled-2026-04.csv]  ✓  Ingestion complete — all inputs loaded and normalised
+2026-06-18 02:41:52  [unbilled-2026-04.csv]  ✓  Pipeline complete
+------------------------------------------------------------------------
+RESULT  [unbilled-2026-04.csv]  ✓ SUCCESS  completed 2026-06-18 02:41:52 UTC  (0.0s)
+
+========================================================================
+RUN  test-exceptions-2026-05.csv  started 2026-06-18 02:41:52 UTC
+========================================================================
+2026-06-18 02:41:52  [test-exceptions-2026-05.csv]  →  Submission received — test-exceptions-2026-05.csv
+2026-06-18 02:41:52  [test-exceptions-2026-05.csv]  →  Phase 1 — loading all inputs
+2026-06-18 02:41:53  [test-exceptions-2026-05.csv]  ✓  Loaded 15 transactions (3 labour, 12 expense, 1 held)
+2026-06-18 02:41:53  [test-exceptions-2026-05.csv]  ✓  Loaded 23 timecard entries
+2026-06-18 02:41:53  [test-exceptions-2026-05.csv]  ✓  Loaded contract — 6 role rates, 18 expense clauses
+2026-06-18 02:41:53  [test-exceptions-2026-05.csv]  ✓  Loaded 15 backup documents (1 composite, 0 unreadable, 2 with alcohol)
+2026-06-18 02:41:53  [test-exceptions-2026-05.csv]  ✓  Loaded 5 PL instructions
+2026-06-18 02:41:53  [test-exceptions-2026-05.csv]  ✓  Loaded 10 prior exception patterns
+2026-06-18 02:41:53  [test-exceptions-2026-05.csv]  ✓  Ingestion complete — all inputs loaded and normalised
+2026-06-18 02:41:53  [test-exceptions-2026-05.csv]  ✓  Pipeline complete
+------------------------------------------------------------------------
+RESULT  [test-exceptions-2026-05.csv]  ✓ SUCCESS  completed 2026-06-18 02:41:53 UTC  (0.0s)
+
+========================================================================
+RUN  unit-tests  started 2026-06-18 13:19:16 UTC
+========================================================================
+2026-06-18 13:19:17  [unit-tests]  →  Unit test suite started — 78 test(s) discovered
+2026-06-18 13:19:17  [unit-tests]  ✓  Passed  : 78
+------------------------------------------------------------------------
+RESULT  [unit-tests]  ✓ SUCCESS  completed 2026-06-18 13:19:17 UTC  (0.8s)
+
+========================================================================
+RUN  unit-tests  started 2026-06-18 13:20:28 UTC
+========================================================================
+2026-06-18 13:20:28  [unit-tests]  →  Unit test suite started — 81 test(s) discovered
+2026-06-18 13:20:28  [unit-tests]  ✓  Passed  : 81
+------------------------------------------------------------------------
+RESULT  [unit-tests]  ✓ SUCCESS  completed 2026-06-18 13:20:28 UTC  (0.3s)
+

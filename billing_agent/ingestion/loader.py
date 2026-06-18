@@ -9,10 +9,11 @@ Returns an IngestionResult with every entity type needed by the pipeline.
 """
 
 import logging
+import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List
+from typing import List, Set
 
 from billing_agent.config import DATA_DIR
 from billing_agent import run_logger
@@ -78,6 +79,31 @@ class IngestionResult:
         )
 
 
+_DOC_ID_RE = re.compile(r"\b((?:RC|ML|VI)-\d{3})\b")
+
+
+def _referenced_doc_ids(transactions: List[Transaction]) -> Set[str]:
+    """Collect every document ID mentioned in transaction note fields."""
+    ids: Set[str] = set()
+    for tx in transactions:
+        ids.update(_DOC_ID_RE.findall(tx.note))
+    return ids
+
+
+def _resolve_timecard_path(submission_path: Path) -> Path:
+    """Derive the timecard path from the cycle embedded in the submission filename."""
+    m = re.search(r"(\d{4}-\d{2})", submission_path.stem)
+    if m:
+        candidate = DATA_DIR / "sap-outputs" / f"timecards-{m.group(1)}.csv"
+        if candidate.exists():
+            return candidate
+        log.warning(
+            "No timecard file for cycle %s (expected %s); falling back to %s",
+            m.group(1), candidate.name, _TIMECARD_PATH.name,
+        )
+    return _TIMECARD_PATH
+
+
 def load_inputs(submission_path: Path) -> IngestionResult:
     """
     Load all inputs for one billing review cycle.
@@ -88,20 +114,30 @@ def load_inputs(submission_path: Path) -> IngestionResult:
     log.info("── ingestion start: %s", submission_path.name)
 
     transactions = load_transactions(submission_path)
+    labour_count  = sum(t.is_labor    for t in transactions)
+    expense_count = sum(t.is_expense  for t in transactions)
+    held_count    = sum(t.is_on_hold  for t in transactions)
     run_logger.step(
         f"Loaded {len(transactions)} transactions "
-        f"({sum(t.is_labor for t in transactions)} labour, "
-        f"{sum(t.is_expense for t in transactions)} expense, "
-        f"{sum(t.is_on_hold for t in transactions)} held)"
+        f"({labour_count} labour, {expense_count} expense, {held_count} held)"
     )
 
-    timecards = load_timecards(_TIMECARD_PATH)
-    run_logger.step(f"Loaded {len(timecards)} timecard entries")
+    employee_ids = {tx.employee_id for tx in transactions if tx.employee_id}
+    doc_ids      = _referenced_doc_ids(transactions)
+    run_logger.step(
+        f"Scope: {len(employee_ids)} employee(s) {sorted(employee_ids)}, "
+        f"{len(doc_ids)} referenced document(s) {sorted(doc_ids)}",
+        "info",
+    )
+
+    timecard_path = _resolve_timecard_path(submission_path)
+    timecards = load_timecards(timecard_path, employee_ids=employee_ids)
+    run_logger.step(f"Loaded {len(timecards)} timecard entries for submission employees")
 
     rates, clauses = load_contract(_CONTRACT_PATH)
     run_logger.step(f"Loaded contract — {len(rates)} role rates, {len(clauses)} expense clauses")
 
-    documents = load_documents(_DOCS_DIR)
+    documents = load_documents(_DOCS_DIR, doc_ids=doc_ids if doc_ids else None)
     composite = sum(d.is_composite for d in documents)
     unreadable = sum(d.is_unreadable for d in documents)
     alcohol = sum(d.has_alcohol for d in documents)
