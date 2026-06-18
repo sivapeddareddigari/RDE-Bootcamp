@@ -17,6 +17,7 @@ OUTPUT_DIR     = BASE_DIR / "output"
 
 POLL_INTERVAL_SECONDS = 5
 ACCEPTED_EXTENSIONS   = {".csv"}
+MAX_RETRIES           = 3          # crash-recovery: quarantine after this many restarts
 
 # ── FX rates (receipt-date spot rates, April 2026) ────────────────────────────
 

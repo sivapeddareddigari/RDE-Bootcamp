@@ -25,4 +25,5 @@ class ReceiptDocument:
     raw_text: str = ""
     is_composite: bool = False
     has_alcohol: bool = False
+    alcohol_amount: float = 0.0   # USD value of excluded alcohol line items
     is_unreadable: bool = False

@@ -9,6 +9,7 @@ Returns an IngestionResult with every entity type needed by the pipeline.
 """
 
 import logging
+import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -78,6 +79,20 @@ class IngestionResult:
         )
 
 
+def _resolve_timecard_path(submission_path: Path) -> Path:
+    """Derive the timecard path from the cycle embedded in the submission filename."""
+    m = re.search(r"(\d{4}-\d{2})", submission_path.stem)
+    if m:
+        candidate = DATA_DIR / "sap-outputs" / f"timecards-{m.group(1)}.csv"
+        if candidate.exists():
+            return candidate
+        log.warning(
+            "No timecard file for cycle %s (expected %s); falling back to %s",
+            m.group(1), candidate.name, _TIMECARD_PATH.name,
+        )
+    return _TIMECARD_PATH
+
+
 def load_inputs(submission_path: Path) -> IngestionResult:
     """
     Load all inputs for one billing review cycle.
@@ -88,14 +103,16 @@ def load_inputs(submission_path: Path) -> IngestionResult:
     log.info("── ingestion start: %s", submission_path.name)
 
     transactions = load_transactions(submission_path)
+    labour_count  = sum(t.is_labor    for t in transactions)
+    expense_count = sum(t.is_expense  for t in transactions)
+    held_count    = sum(t.is_on_hold  for t in transactions)
     run_logger.step(
         f"Loaded {len(transactions)} transactions "
-        f"({sum(t.is_labor for t in transactions)} labour, "
-        f"{sum(t.is_expense for t in transactions)} expense, "
-        f"{sum(t.is_on_hold for t in transactions)} held)"
+        f"({labour_count} labour, {expense_count} expense, {held_count} held)"
     )
 
-    timecards = load_timecards(_TIMECARD_PATH)
+    timecard_path = _resolve_timecard_path(submission_path)
+    timecards = load_timecards(timecard_path)
     run_logger.step(f"Loaded {len(timecards)} timecard entries")
 
     rates, clauses = load_contract(_CONTRACT_PATH)

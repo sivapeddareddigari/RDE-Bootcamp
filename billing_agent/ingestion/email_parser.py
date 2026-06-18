@@ -87,7 +87,7 @@ def _infer_type(subject: str, body: str) -> str:
         return "RELEASE_HOLD"
     if re.search(r"\bapply.*markup\b|\bconfirm.*markup\b|\bmarkup\b", text):
         return "CONFIRM_MARKUP"
-    if re.search(r"\bplease.*bill\b|\bgo ahead and bill\b|\bapproved\b|\bill it\b", text):
+    if re.search(r"\bplease.*bill\b|\bgo ahead and bill\b|\bapproved\b|\bbill it\b", text):
         return "OVERRIDE_APPROVE"
     return "STANDING"
 

@@ -13,6 +13,7 @@ they are automatically recovered to submissions/incoming/ for re-run.
 """
 
 import logging
+import re
 import shutil
 import signal
 import sys
@@ -27,6 +28,7 @@ from billing_agent.config import (
     COMPLETED_DIR,
     FAILED_DIR,
     INCOMING_DIR,
+    MAX_RETRIES,
     OUTPUT_DIR,
     POLL_INTERVAL_SECONDS,
     PROCESSING_DIR,
@@ -71,7 +73,7 @@ def process_submission(submission_path: Path) -> None:
     # TODO Phase 6 — agents.supervisor.run(inputs)
 
     run_logger.step("Pipeline complete", "ok")
-    run_logger.close_run(success=True)
+    # run_logger.close_run() is called by _handle after the file is safely archived
 
 
 # ── Folder watcher ────────────────────────────────────────────────────────────
@@ -123,10 +125,11 @@ class DropFolderWatcher:
             process_submission(processing_path)
             completed_path = COMPLETED_DIR / _stamp(submission.name)
             shutil.move(str(processing_path), completed_path)
+            run_logger.close_run(success=True)   # seal log only after file is archived
             log.info("── completed: %s", completed_path.name)
         except Exception:
             log.exception("── failed: %s", submission.name)
-            run_logger.step(f"Pipeline failed — see console for traceback", "error")
+            run_logger.step("Pipeline failed — see console for traceback", "error")
             run_logger.close_run(success=False)
             failed_path = FAILED_DIR / _stamp(submission.name)
             if processing_path.exists():
@@ -141,19 +144,48 @@ def _ensure_folders() -> None:
         folder.mkdir(parents=True, exist_ok=True)
 
 
+_RETRY_RE = re.compile(r"__r(\d+)$")
+
+
+def _retry_count(stem: str) -> int:
+    m = _RETRY_RE.search(stem)
+    return int(m.group(1)) if m else 0
+
+
+def _bump_retry(name: str) -> str:
+    p = Path(name)
+    n = _retry_count(p.stem)
+    clean = _RETRY_RE.sub("", p.stem)
+    return f"{clean}__r{n + 1}{p.suffix}"
+
+
 def _recover_in_flight() -> None:
-    """Move any files left in processing/ back to incoming/ after a crash."""
+    """
+    Move files left in processing/ back to incoming/ for a retry.
+    After MAX_RETRIES crashes the file is quarantined in failed/ instead.
+    """
     stale = list(PROCESSING_DIR.iterdir())
     if not stale:
         return
     log.warning(
-        "Found %d in-flight file(s) from a previous run — recovering to incoming/",
+        "Found %d in-flight file(s) from a previous run — recovering",
         len(stale),
     )
     for f in stale:
-        dest = INCOMING_DIR / f.name
-        shutil.move(str(f), dest)
-        log.warning("  recovered: %s", f.name)
+        n = _retry_count(Path(f.name).stem)
+        if n >= MAX_RETRIES:
+            dest = FAILED_DIR / _stamp(f.name)
+            shutil.move(str(f), dest)
+            log.error(
+                "  quarantined after %d retries: %s → failed/", n, f.name
+            )
+        else:
+            new_name = _bump_retry(f.name)
+            dest = INCOMING_DIR / new_name
+            shutil.move(str(f), dest)
+            log.warning(
+                "  recovered (attempt %d/%d): %s", n + 1, MAX_RETRIES, new_name
+            )
 
 
 def _stamp(name: str) -> str:
