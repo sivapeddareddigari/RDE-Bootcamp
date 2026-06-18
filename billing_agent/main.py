@@ -23,6 +23,8 @@ from pathlib import Path
 
 from billing_agent.ingestion import load_inputs
 from billing_agent import run_logger
+from billing_agent.rules import rule_engine
+from billing_agent.matching import reconcile
 from billing_agent.config import (
     ACCEPTED_EXTENSIONS,
     COMPLETED_DIR,
@@ -57,12 +59,11 @@ def process_submission(submission_path: Path) -> None:
     run_logger.step("Phase 1 — loading all inputs", "info")
     inputs = load_inputs(submission_path)
 
-    run_logger.step("Phase 2 — rule engine", "info")
-    # Phase 2 data layer complete (rules/data/*.json + sync_rules.py)
-    # TODO Phase 3 wires rule_engine.run(inputs) once matching context is available
+    run_logger.step("Phase 2/3 — rule engine", "info")
+    rule_results = rule_engine.run(inputs)
 
     run_logger.step("Phase 3 — document matching & reconciliation", "info")
-    # TODO Phase 3 — matching.matcher.reconcile(inputs)
+    match_results = reconcile(inputs, rule_results)
 
     run_logger.step("Phase 4 — exception detection & triage", "info")
     # TODO Phase 4 — exceptions.detector.run(inputs)
