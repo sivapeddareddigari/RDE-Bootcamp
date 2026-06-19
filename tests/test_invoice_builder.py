@@ -177,8 +177,8 @@ class TestNoticeWriter:
     def test_notice_shows_blocking_section(self, clean):
         _, _, _, _, written = clean
         notice = next(p for p in written if "exception-notice" in p.name)
-        # TX-1006 (NO_RECEIPT) is blocking
-        assert "Blocking" in notice.read_text()
+        # TX-1006 (NO_RECEIPT) is blocking — section header uses lower-case "blocking items"
+        assert "blocking items" in notice.read_text()
 
     def test_over_cap_two_notices_written(self, over_cap):
         # E-2210 has hard rejections (ALCOHOL, MISCODED) → notice
@@ -407,12 +407,7 @@ class TestInferCycle:
     def test_fallback_for_no_date_in_name(self, tmp_path):
         class _Fake:
             submission_file = tmp_path / "submission-nodates.csv"
-<<<<<<< Updated upstream
         assert _infer_cycle(_Fake()) == "current"
-=======
-
-        result = _infer_cycle(_FakeIngestion())
-        assert result == "current"
 
 
 # ── Project ID mismatch rule ───────────────────────────────────────────────────
@@ -422,7 +417,6 @@ from billing_agent.exceptions import run as _detect_exceptions
 
 
 def _minimal_ingestion(project_id: str, contract_project: str, tmp_path) -> IngestionResult:
-    """One EXPENSE transaction; only fields the rule engine needs are set."""
     tx = Transaction(
         "TX-PROJ-001", project_id, "T-100", date.today(), "EXPENSE",
         "E-001", "", "Hotel — 1 night", 1.0, "NIGHT", 200.0, 200.0,
@@ -486,4 +480,3 @@ class TestProjectMismatch:
     def test_no_project_mismatch_in_subcon_submission(self, subcon):
         _, rr, _, _, _ = subcon
         assert all(r.rule_id != "PROJECT_MISMATCH" for r in rr)
->>>>>>> Stashed changes

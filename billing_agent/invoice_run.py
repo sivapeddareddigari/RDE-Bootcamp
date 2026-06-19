@@ -20,6 +20,7 @@ import sys
 from pathlib import Path
 
 from billing_agent.config import COMPLETED_DIR, OUTPUT_DIR
+from billing_agent.email.mailer import send_invoice_emails
 from billing_agent.ingestion.contacts_loader import load_contacts
 from billing_agent.output.invoice_builder import build
 
@@ -77,14 +78,28 @@ def main() -> None:
     log.info("")
     log.info("Invoice generation complete")
     log.info("  Submissions processed : %d", result.submission_count)
-    log.info("  Labour total          : $%,.2f", result.labour_total)
-    log.info("  Expense total         : $%,.2f", result.expense_total)
-    log.info("  Grand total           : $%,.2f", result.grand_total)
+    log.info("  Labour total          : $%s", f"{result.labour_total:,.2f}")
+    log.info("  Expense total         : $%s", f"{result.expense_total:,.2f}")
+    log.info("  Grand total           : $%s", f"{result.grand_total:,.2f}")
     log.info("  Blocked items         : %d", result.blocked_count)
     log.info("")
     log.info("  Draft invoice   → %s", result.invoice_path)
     log.info("  Audit trail     → %s", result.audit_path)
     log.info("  Exceptions      → %s", result.exceptions_path)
+
+    send_invoice_emails(
+        invoice_path    = result.invoice_path,
+        audit_path      = result.audit_path,
+        exceptions_path = result.exceptions_path,
+        labour_total    = result.labour_total,
+        expense_total   = result.expense_total,
+        grand_total     = result.grand_total,
+        blocked_count   = result.blocked_count,
+        submission_count= result.submission_count,
+        billing_month   = args.month,
+        project_id      = args.project,
+        contacts        = contacts,
+    )
 
     if result.blocked_count > 0:
         log.warning(

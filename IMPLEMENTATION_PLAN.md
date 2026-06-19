@@ -17,7 +17,7 @@
 | Phase 3 | Rule engine evaluation, document matching & override resolution | ✅ Done | `1ca6104` |
 | Phase 4 | Exception detection & triage | ✅ Done | `HEAD` |
 | Phase 5 | Invoice builder & outputs | ✅ Done | `HEAD` |
-| Phase 6 | Agentic orchestration (Claude API) | ⏳ Pending | — |
+| Phase 6 | Agentic orchestration (Claude API) | ✅ Done | HEAD |
 | Phase 7 | Testing | 🔄 In Progress | `624b1d5` → latest |
 
 ---
@@ -430,12 +430,12 @@ billing_agent/
 ├── exceptions/          ✅  (Phase 4 — complete)
 │   ├── models.py             ✅ ExceptionItem, ExceptionReport dataclasses
 │   └── detector.py           ✅ Classify and triage all non-APPROVE rule results
-├── stores/              ⏳  (Phase 6)
-│   ├── decision_memory.py    R/W pattern library (grows each cycle)
-│   └── instruction_store.py  R/W PL rules per project
-├── agents/              ⏳  (Phase 6)
-│   ├── supervisor.py         LLM agent — orchestrates pipeline sequence
-│   └── exception_agent.py    LLM agent — pattern lookup + novel case routing
+├── stores/              ✅  (Phase 6 — complete)
+│   ├── decision_memory.py    ✅ load_memory() → List[ExceptionCase]; find_relevant(); format_for_prompt()
+│   └── instruction_store.py  ✅ format_for_prompt(List[ProjectInstruction]) → prompt string
+├── agents/              ✅  (Phase 6 — complete)
+│   ├── supervisor.py         ✅ Claude tool-use loop → SupervisorResult; fallback to deterministic pipeline
+│   └── exception_agent.py    ✅ Single-turn structured-output → List[ExceptionAnalysis]; fallback → []
 ├── data/                ✅  (Phase 5 — complete)
 │   └── contacts.json         ✅ Contact directory — employees, billing analysts, project leads
 ├── invoice_run.py       ✅  (Phase 5) Month-end CLI: --project + --month args

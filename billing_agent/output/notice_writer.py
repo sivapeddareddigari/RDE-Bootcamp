@@ -17,7 +17,7 @@ activity triggered separately via billing_agent/invoice_run.py.
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from billing_agent import run_logger
 from billing_agent.config import OUTPUT_DIR
@@ -69,9 +69,17 @@ def write_notices(
     rule_results: List[RuleResult],
     exception_report: ExceptionReport,
     contacts: ContactDirectory,
+    llm_texts: Optional[Dict[str, str]] = None,
+    llm_auto_resolved: Optional[set] = None,
 ) -> List[Path]:
     """
     Write per-employee exception notices and an analyst summary.
+
+    llm_texts: transaction_id → LLM-generated action text (replaces template).
+    llm_auto_resolved: set of transaction_ids the LLM resolved via PL instruction
+        or prior pattern — these are removed from employee action-required sections
+        and shown as "handled automatically" so the employee doesn't act needlessly.
+
     Returns paths to all files written (notices + summary).
     """
     ts   = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -81,6 +89,8 @@ def write_notices(
     notices_dir = OUTPUT_DIR / "notices"
     notices_dir.mkdir(parents=True, exist_ok=True)
 
+    llm = llm_texts or {}
+    auto_resolved = llm_auto_resolved or set()
     written: List[Path] = []
 
     # ── Per-employee exception notices ────────────────────────────────────────
@@ -91,7 +101,7 @@ def write_notices(
         if not items:
             continue                      # clean employee — no notice needed
         path = notices_dir / f"exception-notice-{emp_id}-{stem}__{ts}.md"
-        _write_employee_notice(path, emp_id, emp, items, inputs, ts)
+        _write_employee_notice(path, emp_id, emp, items, inputs, ts, llm, auto_resolved)
         written.append(path)
         log.info("  notice → %s", path.name)
 
@@ -128,12 +138,19 @@ def _write_employee_notice(
     items: List[ExceptionItem],
     inputs: IngestionResult,
     ts: str,
+    llm_texts: Optional[Dict[str, str]] = None,
+    llm_auto_resolved: Optional[set] = None,
 ) -> None:
     name  = emp.name if emp else employee_id
     email = emp.email if emp else "—"
+    auto  = llm_auto_resolved or set()
 
     lines = []
     w = lines.append
+
+    # Items that need employee action (exclude LLM-auto-resolved)
+    actionable = [i for i in items if i.transaction_id not in auto]
+    handled    = [i for i in items if i.transaction_id in auto]
 
     w(f"# Expense Claim Exception Notice")
     w("")
@@ -147,29 +164,73 @@ def _write_employee_notice(
     w("")
     w(f"Hi {name.split()[0]},")
     w("")
-    w("Your expense claim for the above billing cycle has been reviewed by the billing agent. "
-      f"**{len(items)} item(s) require your attention** before they can be included in the "
-      "month-end invoice to the client. Please action the items below in SAP and resubmit.")
+    if actionable:
+        w("Your expense claim for the above billing cycle has been reviewed by the billing agent. "
+          f"**{len(actionable)} item(s) require your attention** before they can be included in the "
+          "month-end invoice to the client. Please action the items below in SAP and resubmit.")
+    else:
+        w("Your expense claim for the above billing cycle has been reviewed by the billing agent. "
+          "All flagged items have been resolved automatically — no action is required from you.")
     w("")
 
-    blocking = [i for i in items if i.blocks_invoice]
-    non_blocking = [i for i in items if not i.blocks_invoice]
+    emp_blocking     = [i for i in actionable if i.routing == "EMPLOYEE" and i.blocks_invoice]
+    emp_non_blocking = [i for i in actionable if i.routing == "EMPLOYEE" and not i.blocks_invoice]
+    pl_items         = [i for i in actionable if i.routing == "PL"]
+    analyst_items    = [i for i in actionable if i.routing == "ANALYST"]
+    rejection_items  = [i for i in actionable if i.routing not in ("EMPLOYEE", "PL", "ANALYST")]
 
-    if blocking:
-        w(f"## ⚠ Blocking items ({len(blocking)}) — must be resolved before invoicing")
+    if emp_blocking:
+        w(f"## ⚠ Action required — blocking items ({len(emp_blocking)})")
         w("")
-        w("These charges **cannot appear on the client invoice** until resolved.")
+        w("These charges **cannot appear on the client invoice** until you resolve them. "
+          "Please complete the action below in SAP and resubmit **before month-end**.")
         w("")
-        _item_table(lines, blocking)
+        _item_table(lines, emp_blocking, llm_texts or {})
         w("")
 
-    if non_blocking:
-        w(f"## Items under review ({len(non_blocking)}) — analyst or PL action in progress")
+    if emp_non_blocking:
+        w(f"## Action required — please correct and resubmit ({len(emp_non_blocking)})")
         w("")
-        w("These items are being reviewed by the billing analyst or Project Lead. "
-          "No action required from you unless contacted separately.")
+        w("These items will not hold the invoice, but they are flagged and **will not be billed "
+          "to the client** in their current state. Please correct in SAP and resubmit.")
         w("")
-        _item_table(lines, non_blocking)
+        _item_table(lines, emp_non_blocking, llm_texts or {})
+        w("")
+
+    if pl_items:
+        w(f"## PL approval required ({len(pl_items)})")
+        w("")
+        w("These items exceed a policy threshold and require written Project Lead approval "
+          "to appear on the invoice. You may also correct the SAP entry to bring it within "
+          "policy — either path resolves the flag.")
+        w("")
+        _item_table(lines, pl_items, llm_texts or {})
+        w("")
+
+    if analyst_items:
+        w(f"## Under analyst review ({len(analyst_items)})")
+        w("")
+        w("The billing analyst is reviewing these items. No action is required from you "
+          "right now — you will be contacted if anything further is needed.")
+        w("")
+        _item_table(lines, analyst_items, llm_texts or {})
+        w("")
+
+    if handled:
+        w(f"## Handled automatically ({len(handled)}) — no action needed")
+        w("")
+        w("The billing agent resolved these items automatically based on a PL instruction "
+          "or prior approval pattern. They will be processed by the analyst — no action from you.")
+        w("")
+        _item_table(lines, handled, llm_texts or {})
+        w("")
+
+    if rejection_items:
+        w(f"## Rejected items ({len(rejection_items)})")
+        w("")
+        w("These charges have been removed from your claim and **will not appear on the invoice**.")
+        w("")
+        _item_table(lines, rejection_items, llm_texts or {})
         w("")
 
     w("---")
@@ -180,12 +241,17 @@ def _write_employee_notice(
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def _item_table(lines: List[str], items: List[ExceptionItem]) -> None:
+def _item_table(
+    lines: List[str],
+    items: List[ExceptionItem],
+    llm_texts: Dict[str, str],
+) -> None:
     w = lines.append
     w("| Transaction | Description | Amount (USD) | Issue | Action required |")
     w("|-------------|-------------|-------------:|-------|-----------------|")
     for item in items:
-        action = _action(item.rule_id, item.note)
+        # LLM-generated text takes precedence over the generic template
+        action = llm_texts.get(item.transaction_id) or _action(item.rule_id, item.note)
         w(f"| {item.transaction_id} | {item.description[:45]} "
           f"| {item.original_amount:,.2f} | {item.note[:60]} | {action} |")
 

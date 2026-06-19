@@ -23,6 +23,9 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
+from zoneinfo import ZoneInfo
+
+_ET = ZoneInfo("America/New_York")
 
 from billing_agent.config import LOG_FILE, OUTPUT_DIR
 
@@ -77,7 +80,7 @@ class RunLogger:
     def __init__(self, submission_name: str):
         self._submission = submission_name
         self._start_time = time.monotonic()
-        self._start_dt   = datetime.now(timezone.utc)
+        self._start_dt   = datetime.now(_ET)
 
         OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
         self._fh = LOG_FILE.open("a", encoding="utf-8", buffering=1)
@@ -88,7 +91,7 @@ class RunLogger:
     # ── Public ────────────────────────────────────────────────────────────────
 
     def step(self, description: str, status: str = "ok") -> None:
-        now  = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        now  = datetime.now(_ET).strftime("%Y-%m-%d %H:%M:%S")
         icon = _ICONS.get(status, "→")
         self._fh.write(f"{now}  [{self._submission}]  {icon}  {description}\n")
         log.info("%s %s", icon, description)
@@ -97,7 +100,7 @@ class RunLogger:
         elapsed = time.monotonic() - self._start_time
         result  = "SUCCESS" if success else "FAILED"
         icon    = "✓" if success else "✗"
-        end_dt  = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+        end_dt  = datetime.now(_ET).strftime("%Y-%m-%d %H:%M:%S %Z")
 
         self._fh.write(
             f"{'-' * 72}\n"
@@ -112,7 +115,7 @@ class RunLogger:
     # ── Private ───────────────────────────────────────────────────────────────
 
     def _write_header(self) -> None:
-        started = self._start_dt.strftime("%Y-%m-%d %H:%M:%S UTC")
+        started = self._start_dt.strftime("%Y-%m-%d %H:%M:%S %Z")
         self._fh.write(
             f"{'=' * 72}\n"
             f"RUN  {self._submission}  started {started}\n"
