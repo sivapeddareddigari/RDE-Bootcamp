@@ -1037,3 +1037,105 @@ RUN  submission-E4501-principal-cap-2026-04.csv  started 2026-06-18 19:55:58 EDT
 ------------------------------------------------------------------------
 RESULT  [submission-E4501-principal-cap-2026-04.csv]  ✓ SUCCESS  completed 2026-06-18 19:56:08 EDT  (10.3s)
 
+========================================================================
+RUN  submission-E1041-clean-2026-04.csv  started 2026-06-18 21:17:20 EDT
+========================================================================
+2026-06-18 21:17:20  [submission-E1041-clean-2026-04.csv]  →  Submission received — submission-E1041-clean-2026-04.csv
+2026-06-18 21:17:21  [submission-E1041-clean-2026-04.csv]  →  Supervisor: I'll process the billing submission through all three steps. Let me start by running the pipeline.
+2026-06-18 21:17:21  [submission-E1041-clean-2026-04.csv]  ✓  Loaded 7 transactions (2 labour, 5 expense, 0 held)
+2026-06-18 21:17:21  [submission-E1041-clean-2026-04.csv]  →  Scope: 1 employee(s) ['E-1041'], 4 referenced document(s) ['ML-001', 'RC-001', 'RC-003', 'RC-004']
+2026-06-18 21:17:21  [submission-E1041-clean-2026-04.csv]  ✓  Loaded 6 timecard entries for submission employees
+2026-06-18 21:17:21  [submission-E1041-clean-2026-04.csv]  ✓  Loaded contract — 6 role rates, 18 expense clauses, project SAP: PRJ-NS-7421
+2026-06-18 21:17:21  [submission-E1041-clean-2026-04.csv]  ✓  Loaded 3 backup documents (0 composite, 0 unreadable, 1 with alcohol)
+2026-06-18 21:17:21  [submission-E1041-clean-2026-04.csv]  ✓  Loaded 5 PL instructions
+2026-06-18 21:17:21  [submission-E1041-clean-2026-04.csv]  ✓  Loaded 10 prior exception patterns
+2026-06-18 21:17:21  [submission-E1041-clean-2026-04.csv]  ✓  Ingestion complete — all inputs loaded and normalised
+2026-06-18 21:17:21  [submission-E1041-clean-2026-04.csv]  ⚠  Rule engine — 5 approved, 2 flagged, 0 rejected, 0 held, 1 overridden
+2026-06-18 21:17:21  [submission-E1041-clean-2026-04.csv]  ✗  Exception triage — 4 clean, 1 resolved, 0 rejected, 2 escalated (1 analyst / 1 employee / 0 PL), 1 BLOCKING invoice
+2026-06-18 21:17:21  [submission-E1041-clean-2026-04.csv]  →  Supervisor → run_pipeline_phases_1_to_4
+2026-06-18 21:17:22  [submission-E1041-clean-2026-04.csv]  →  Supervisor: The pipeline has identified 2 unresolved exceptions and 1 blocking exception out of 7 transactions. Let me now call the 
+2026-06-18 21:17:27  [submission-E1041-clean-2026-04.csv]  ✓  Exception agent — 2 item(s) analysed  (1 auto-resolved by LLM, 1 escalating)
+2026-06-18 21:17:27  [submission-E1041-clean-2026-04.csv]  →  Supervisor → analyse_unresolved_exceptions
+2026-06-18 21:17:29  [submission-E1041-clean-2026-04.csv]  →  Supervisor: Good news—the LLM analysis has auto-resolved 1 of the 2 unresolved exceptions. Now let me generate the employee notices 
+2026-06-18 21:17:29  [submission-E1041-clean-2026-04.csv]  ⚠  Notices — 1 employee notice(s) written, analyst summary written
+2026-06-18 21:17:29  [submission-E1041-clean-2026-04.csv]  →  Supervisor → write_notices_and_summary
+2026-06-18 21:17:31  [submission-E1041-clean-2026-04.csv]  →  Supervisor: **Summary of Findings:**
+
+The billing submission for E1041 (April 2026) contained 7 transactions: 4 were clean, 1 was au
+2026-06-18 21:17:31  [submission-E1041-clean-2026-04.csv]  ✓  Supervisor agent — pipeline complete
+2026-06-18 21:17:34  [submission-E1041-clean-2026-04.csv]  ✓  Email — 2 message(s) dispatched
+2026-06-18 21:17:34  [submission-E1041-clean-2026-04.csv]  ✓  Pipeline complete
+------------------------------------------------------------------------
+RESULT  [submission-E1041-clean-2026-04.csv]  ✓ SUCCESS  completed 2026-06-18 21:17:34 EDT  (13.6s)
+
+========================================================================
+RUN  submission-E1041-clean-2026-04.csv  started 2026-06-18 21:19:58 EDT
+========================================================================
+2026-06-18 21:19:58  [submission-E1041-clean-2026-04.csv]  →  Submission received — submission-E1041-clean-2026-04.csv
+2026-06-18 21:19:59  [submission-E1041-clean-2026-04.csv]  ⚠  Supervisor — falling back to deterministic pipeline
+2026-06-18 21:19:59  [submission-E1041-clean-2026-04.csv]  ✓  Loaded 7 transactions (2 labour, 5 expense, 0 held)
+2026-06-18 21:19:59  [submission-E1041-clean-2026-04.csv]  →  Scope: 1 employee(s) ['E-1041'], 4 referenced document(s) ['ML-001', 'RC-001', 'RC-003', 'RC-004']
+2026-06-18 21:19:59  [submission-E1041-clean-2026-04.csv]  ✓  Loaded 6 timecard entries for submission employees
+2026-06-18 21:19:59  [submission-E1041-clean-2026-04.csv]  ✓  Loaded contract — 6 role rates, 18 expense clauses, project SAP: PRJ-NS-7421
+2026-06-18 21:19:59  [submission-E1041-clean-2026-04.csv]  ✓  Loaded 3 backup documents (0 composite, 0 unreadable, 1 with alcohol)
+2026-06-18 21:19:59  [submission-E1041-clean-2026-04.csv]  ✓  Loaded 5 PL instructions
+2026-06-18 21:19:59  [submission-E1041-clean-2026-04.csv]  ✓  Loaded 10 prior exception patterns
+2026-06-18 21:19:59  [submission-E1041-clean-2026-04.csv]  ✓  Ingestion complete — all inputs loaded and normalised
+2026-06-18 21:19:59  [submission-E1041-clean-2026-04.csv]  ⚠  Rule engine — 5 approved, 2 flagged, 0 rejected, 0 held, 1 overridden
+2026-06-18 21:19:59  [submission-E1041-clean-2026-04.csv]  ✗  Exception triage — 4 clean, 1 resolved, 0 rejected, 2 escalated (1 analyst / 1 employee / 0 PL), 1 BLOCKING invoice
+2026-06-18 21:19:59  [submission-E1041-clean-2026-04.csv]  ⚠  Notices — 1 employee notice(s) written, analyst summary written
+2026-06-18 21:20:01  [submission-E1041-clean-2026-04.csv]  ✓  Email — 2 message(s) dispatched
+2026-06-18 21:20:01  [submission-E1041-clean-2026-04.csv]  ✓  Pipeline complete
+------------------------------------------------------------------------
+RESULT  [submission-E1041-clean-2026-04.csv]  ✓ SUCCESS  completed 2026-06-18 21:20:01 EDT  (2.7s)
+
+========================================================================
+RUN  submission-E4501-principal-cap-2026-04.csv  started 2026-06-18 21:23:02 EDT
+========================================================================
+2026-06-18 21:23:02  [submission-E4501-principal-cap-2026-04.csv]  →  Submission received — submission-E4501-principal-cap-2026-04.csv
+2026-06-18 21:23:02  [submission-E4501-principal-cap-2026-04.csv]  ⚠  Supervisor — falling back to deterministic pipeline
+2026-06-18 21:23:02  [submission-E4501-principal-cap-2026-04.csv]  ✓  Loaded 4 transactions (2 labour, 2 expense, 1 held)
+2026-06-18 21:23:02  [submission-E4501-principal-cap-2026-04.csv]  →  Scope: 1 employee(s) ['E-4501'], 2 referenced document(s) ['RC-031', 'VI-002']
+2026-06-18 21:23:02  [submission-E4501-principal-cap-2026-04.csv]  ✓  Loaded 2 timecard entries for submission employees
+2026-06-18 21:23:02  [submission-E4501-principal-cap-2026-04.csv]  ✓  Loaded contract — 6 role rates, 18 expense clauses, project SAP: PRJ-NS-7421
+2026-06-18 21:23:02  [submission-E4501-principal-cap-2026-04.csv]  ✓  Loaded 1 backup documents (0 composite, 0 unreadable, 0 with alcohol)
+2026-06-18 21:23:02  [submission-E4501-principal-cap-2026-04.csv]  ✓  Loaded 5 PL instructions
+2026-06-18 21:23:02  [submission-E4501-principal-cap-2026-04.csv]  ✓  Loaded 10 prior exception patterns
+2026-06-18 21:23:02  [submission-E4501-principal-cap-2026-04.csv]  ✓  Ingestion complete — all inputs loaded and normalised
+2026-06-18 21:23:02  [submission-E4501-principal-cap-2026-04.csv]  ⚠  Rule engine — 3 approved, 1 flagged, 0 rejected, 0 held, 1 overridden
+2026-06-18 21:23:02  [submission-E4501-principal-cap-2026-04.csv]  ✗  Exception triage — 2 clean, 1 resolved, 0 rejected, 1 escalated (0 analyst / 1 employee / 0 PL), 1 BLOCKING invoice
+2026-06-18 21:23:02  [submission-E4501-principal-cap-2026-04.csv]  ⚠  Notices — 1 employee notice(s) written, analyst summary written
+2026-06-18 21:23:04  [submission-E4501-principal-cap-2026-04.csv]  ✓  Email — 2 message(s) dispatched
+2026-06-18 21:23:04  [submission-E4501-principal-cap-2026-04.csv]  ✓  Pipeline complete
+------------------------------------------------------------------------
+RESULT  [submission-E4501-principal-cap-2026-04.csv]  ✓ SUCCESS  completed 2026-06-18 21:23:04 EDT  (2.3s)
+
+========================================================================
+RUN  submission-E4501-principal-cap-2026-04.csv  started 2026-06-18 21:24:00 EDT
+========================================================================
+2026-06-18 21:24:00  [submission-E4501-principal-cap-2026-04.csv]  →  Submission received — submission-E4501-principal-cap-2026-04.csv
+2026-06-18 21:24:01  [submission-E4501-principal-cap-2026-04.csv]  →  Supervisor: I'll process the billing submission through all three steps. Let me start by running the pipeline.
+2026-06-18 21:24:01  [submission-E4501-principal-cap-2026-04.csv]  ✓  Loaded 4 transactions (2 labour, 2 expense, 1 held)
+2026-06-18 21:24:01  [submission-E4501-principal-cap-2026-04.csv]  →  Scope: 1 employee(s) ['E-4501'], 2 referenced document(s) ['RC-031', 'VI-002']
+2026-06-18 21:24:01  [submission-E4501-principal-cap-2026-04.csv]  ✓  Loaded 2 timecard entries for submission employees
+2026-06-18 21:24:01  [submission-E4501-principal-cap-2026-04.csv]  ✓  Loaded contract — 6 role rates, 18 expense clauses, project SAP: PRJ-NS-7421
+2026-06-18 21:24:01  [submission-E4501-principal-cap-2026-04.csv]  ✓  Loaded 1 backup documents (0 composite, 0 unreadable, 0 with alcohol)
+2026-06-18 21:24:01  [submission-E4501-principal-cap-2026-04.csv]  ✓  Loaded 5 PL instructions
+2026-06-18 21:24:01  [submission-E4501-principal-cap-2026-04.csv]  ✓  Loaded 10 prior exception patterns
+2026-06-18 21:24:01  [submission-E4501-principal-cap-2026-04.csv]  ✓  Ingestion complete — all inputs loaded and normalised
+2026-06-18 21:24:01  [submission-E4501-principal-cap-2026-04.csv]  ⚠  Rule engine — 3 approved, 1 flagged, 0 rejected, 0 held, 1 overridden
+2026-06-18 21:24:01  [submission-E4501-principal-cap-2026-04.csv]  ✗  Exception triage — 2 clean, 1 resolved, 0 rejected, 1 escalated (0 analyst / 1 employee / 0 PL), 1 BLOCKING invoice
+2026-06-18 21:24:01  [submission-E4501-principal-cap-2026-04.csv]  →  Supervisor → run_pipeline_phases_1_to_4
+2026-06-18 21:24:02  [submission-E4501-principal-cap-2026-04.csv]  →  Supervisor: The pipeline found unresolved exceptions. Now I'll call the exception reasoning agent to analyse them.
+2026-06-18 21:24:06  [submission-E4501-principal-cap-2026-04.csv]  ✓  Exception agent — 1 item(s) analysed  (0 auto-resolved by LLM, 1 escalating)
+2026-06-18 21:24:06  [submission-E4501-principal-cap-2026-04.csv]  →  Supervisor → analyse_unresolved_exceptions
+2026-06-18 21:24:07  [submission-E4501-principal-cap-2026-04.csv]  →  Supervisor: Now I'll write the employee notices and analyst summary, using the LLM-generated text where available.
+2026-06-18 21:24:07  [submission-E4501-principal-cap-2026-04.csv]  ⚠  Notices — 1 employee notice(s) written, analyst summary written
+2026-06-18 21:24:07  [submission-E4501-principal-cap-2026-04.csv]  →  Supervisor → write_notices_and_summary
+2026-06-18 21:24:08  [submission-E4501-principal-cap-2026-04.csv]  →  Supervisor: **Summary:** Processing of submission E4501-principal-cap-2026-04 is complete: 4 transactions processed (2 clean, 1 auto
+2026-06-18 21:24:08  [submission-E4501-principal-cap-2026-04.csv]  ✓  Supervisor agent — pipeline complete
+2026-06-18 21:24:11  [submission-E4501-principal-cap-2026-04.csv]  ✓  Email — 2 message(s) dispatched
+2026-06-18 21:24:11  [submission-E4501-principal-cap-2026-04.csv]  ✓  Pipeline complete
+------------------------------------------------------------------------
+RESULT  [submission-E4501-principal-cap-2026-04.csv]  ✓ SUCCESS  completed 2026-06-18 21:24:11 EDT  (10.9s)
+

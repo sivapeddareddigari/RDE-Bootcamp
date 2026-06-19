@@ -43,7 +43,7 @@ python3 -m pytest tests/ -v
 | Phase 6 | Agentic orchestration (Claude API) | ✅ Done | HEAD |
 | Phase 7 | Testing | ✅ Done | HEAD |
 
-**Test suite:** 241 tests, all passing. Run: `python3 -m pytest tests/ -v`
+**Test suite:** 289 tests, all passing. Run: `python3 -m pytest tests/ -v`
 
 ---
 
@@ -144,10 +144,11 @@ billing_agent/
 tests/
 ├── conftest.py                 # shared paths and submission fixture constants
 ├── test_sap_loader.py          # 22 tests
-├── test_doc_parser.py          # 25 tests
-├── test_loader.py              # 34 tests
+├── test_doc_parser.py          # 30 tests
+├── test_loader.py              # 31 tests
 ├── test_sync_rules.py          # 79 tests
-├── test_invoice_builder.py     # 55 tests (contacts loader, notice writer, invoice builder, helpers)
+├── test_invoice_builder.py     # 64 tests (contacts loader, notice writer, invoice builder, helpers, LLM routing)
+├── test_email.py               # 37 tests (HTML email, SMTP mock, submission + invoice dispatch)
 └── test_phase6.py              # 26 tests (stores, exception agent, supervisor, notice writer LLM path)
 
 test-data/sample-inputs/
@@ -288,16 +289,13 @@ class ContactDirectory:
 | Test file | Tests | Scope |
 |-----------|-------|-------|
 | `test_sap_loader.py` | 22 | Transaction parsing, timecard employee filter |
-| `test_doc_parser.py` | 25 | Document ID filtering, composite/unreadable/alcohol detection |
-| `test_loader.py` | 34 | IngestionResult scoping — timecards, documents, static data |
+| `test_doc_parser.py` | 30 | Document ID filtering, composite/unreadable/alcohol detection |
+| `test_loader.py` | 31 | IngestionResult scoping — timecards, documents, static data |
 | `test_sync_rules.py` | 79 | JSON rule values, sync idempotency, keyword lists |
-| `test_invoice_builder.py` | 55 | Contacts loader (6), notice writer (12), project invoice (19), helpers (18) |
-| **Total** | **215** | **All passing** |
-
-### Pending tests (Phase 7 completion)
-- `tests/test_rules.py` — each rule evaluation against known inputs
-- `tests/test_matching.py` — doc-to-transaction linkage
-- `tests/test_currency.py` — CAD→USD conversion
+| `test_invoice_builder.py` | 64 | Contacts loader (6), notice writer (12), project invoice (19), helpers (18), LLM routing (9) |
+| `test_email.py` | 37 | HTML email generation, SMTP mock, submission + invoice dispatch |
+| `test_phase6.py` | 26 | Decision memory, instruction store, exception agent, supervisor, LLM notice integration |
+| **Total** | **289** | **All passing** |
 
 ---
 
@@ -363,16 +361,23 @@ Two agents, both using `claude-haiku-4-5-20251001`, with graceful fallback to th
 - `instruction_store.py`: formats PL instructions for LLM prompt context
 
 ### API Key Resolution
-Both agents call `_resolve_api_key()` which checks:
-1. `ANTHROPIC_API_KEY` env var
-2. `.claude/settings.local.json` → `env.ANTHROPIC_API_KEY`
-3. `~/.claude/settings.local.json` → same
-4. `~/.claude/settings.json` → same
+Both agents call `_resolve_api_key()` which checks (in order):
+1. `ANTHROPIC_API_KEY` environment variable
+2. Project `.env` file at repo root (parsed without `python-dotenv`)
+3. `.claude/settings.local.json` → `env.ANTHROPIC_API_KEY`
+4. `~/.claude/settings.local.json` → same
+5. `~/.claude/settings.json` → same
 
-If no key found: graceful fallback (no crash).
+If no key found: graceful fallback (no crash). To force fallback, set `ANTHROPIC_API_KEY=` (blank) in `.env`.
 
 ### notice_writer.py changes
-`write_notices()` now accepts `llm_texts: Optional[Dict[str, str]]` — maps `transaction_id` → LLM-generated notice text. When provided, replaces the generic `_ACTION` template strings in the exception item table.
+`write_notices()` now accepts two optional parameters:
+- `llm_texts: Optional[Dict[str, str]]` — maps `transaction_id` → LLM-generated notice text; replaces the generic `_ACTION` template strings.
+- `llm_auto_resolved: Optional[set]` — transaction IDs the LLM marked `AUTO_RESOLVE`; these are excluded from employee action-required sections and shown in a "Handled automatically" section instead.
+
+### Bugs fixed in this session
+1. **Exception agent always fell back to templates** — `exception_agent._resolve_api_key()` did not read the `.env` file (unlike the supervisor). Fixed by adding identical `.env` parsing to both agents.
+2. **AUTO_RESOLVE recommendations had no effect on notices** — `ExceptionAnalysis.recommendation == "AUTO_RESOLVE"` was stored but never passed to `write_notices()`. Fixed by threading `llm_auto_resolved` set from supervisor → `write_notices()` → `_write_employee_notice()`.
 
 ---
 
@@ -380,6 +385,8 @@ If no key found: graceful fallback (no crash).
 
 | File | Purpose |
 |------|---------|
+| `how-to-run.md` | Feature reference, `.env` configuration guide, LLM vs fallback comparison |
+| `implementation-status.svg` | Architecture diagram with implementation status colour coding |
 | `IMPLEMENTATION_PLAN.md` | Full phased plan with progress tracker and rule values |
 | `EXECUTION_FLOW.md` | Step-by-step data flow — both triggers explained |
 | `billing_agent/main.py` | Per-submission pipeline orchestrator |

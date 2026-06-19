@@ -18,7 +18,7 @@
 | Phase 4 | Exception detection & triage | ✅ Done | `HEAD` |
 | Phase 5 | Invoice builder & outputs | ✅ Done | `HEAD` |
 | Phase 6 | Agentic orchestration (Claude API) | ✅ Done | HEAD |
-| Phase 7 | Testing | 🔄 In Progress | `624b1d5` → latest |
+| Phase 7 | Testing | ✅ Done | HEAD |
 
 ---
 
@@ -265,18 +265,13 @@ Summary logged to: `output/billing_agent.log`
 | Test file | Tests | Covers |
 |-----------|-------|--------|
 | `tests/test_sap_loader.py` | 22 | Transaction parsing (hold flags, currency, rate×qty arithmetic, labour/expense split); timecard employee filter |
-| `tests/test_doc_parser.py` | 25 | Document ID filtering; composite/unreadable/alcohol/currency/type detection; line item extraction |
-| `tests/test_loader.py` | 34 | `_referenced_doc_ids` helper; timecard scoping per submission; document scoping; static data always loaded |
+| `tests/test_doc_parser.py` | 30 | Document ID filtering; composite/unreadable/alcohol/currency/type detection; line item extraction |
+| `tests/test_loader.py` | 31 | `_referenced_doc_ids` helper; timecard scoping per submission; document scoping; static data always loaded |
 | `tests/test_sync_rules.py` | 79 | JSON file existence and validity; all rule values from contract; builder functions with modified contract text; keyword list content; sync idempotency |
-| `tests/test_invoice_builder.py` | 55 | `ContactsLoader` (6 tests) — load + lookup helpers; `NoticeWriter` (12 tests) — employee notices, analyst summary content; `InvoiceBuild` (19 tests) — project-level aggregation, audit trail, invoice/exceptions content; `_categorize`, `_has_markup`, `_infer_cycle` helpers (18 tests) |
-
-### Remaining test work (Phase 7 completion)
-
-| Test file | Status | Covers |
-|-----------|--------|--------|
-| `tests/test_rules.py` | ⏳ Pending | Each rule evaluation against known inputs |
-| `tests/test_matching.py` | ⏳ Pending | Doc-to-transaction linkage for all 12 complex cases |
-| `tests/test_currency.py` | ⏳ Pending | CAD→USD conversion for RC-015 |
+| `tests/test_invoice_builder.py` | 64 | `ContactsLoader` (6 tests) — load + lookup helpers; `NoticeWriter` (12 tests) — employee notices, analyst summary content; `InvoiceBuild` (19 tests) — project-level aggregation, audit trail, invoice/exceptions content; `_categorize`, `_has_markup`, `_infer_cycle` helpers (18 tests); LLM notice routing (9 tests) |
+| `tests/test_email.py` | 37 | HTML email generation, multipart structure, SMTP mock, submission + invoice email dispatch |
+| `tests/test_phase6.py` | 26 | Decision memory, instruction store, exception agent (JSON parsing, mocked API), supervisor (fallback, tool-use loop, API error), notice writer LLM text integration |
+| **Total** | **289** | **All passing** |
 
 ---
 

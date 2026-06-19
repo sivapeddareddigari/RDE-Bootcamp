@@ -36,7 +36,7 @@ submissions/incoming/          ← CSV dropped here
 [PHASE 5a] Notice Writer (per-submission)
      │
      ▼
-[PHASE 6] Agentic Orchestration (Claude API)  ← stub today
+[PHASE 6] Agentic Orchestration (Claude API)  ← implemented
      │
      ▼
 submissions/completed/         ← timestamped archive
@@ -604,21 +604,22 @@ Every run appends to `output/billing_agent.log`:
 
 ```
 ========================================================================
-RUN  submission-E2210-over-cap-alcohol-2026-04.csv  started 2026-06-18 13:00:00 UTC
+RUN  submission-E2210-over-cap-alcohol-2026-04.csv  started 2026-06-18 13:00:00 EDT
 ========================================================================
-2026-06-18 13:00:00  [submission-E2210...]  →  Submission received — Phase 1 starting
+2026-06-18 13:00:00  [submission-E2210...]  →  Submission received — submission-E2210-over-cap-alcohol-2026-04.csv
 2026-06-18 13:00:00  [submission-E2210...]  ✓  Loaded 7 transactions (2 labour, 5 expense, 0 held)
 2026-06-18 13:00:00  [submission-E2210...]  →  Scope: 1 employee(s) ['E-2210'], 2 doc(s) ['RC-012','RC-013']
 2026-06-18 13:00:00  [submission-E2210...]  ✓  Loaded 6 timecard entries for submission employees
 2026-06-18 13:00:00  [submission-E2210...]  ✓  Loaded contract — 6 role rates, 18 expense clauses
 2026-06-18 13:00:00  [submission-E2210...]  ✓  Loaded 2 backup documents (0 composite, 0 unreadable, 0 alcohol)
-2026-06-18 13:00:00  [submission-E2210...]  ⚠  OVER_CAP: Hotel $310.00 exceeds $275.00 metro cap
-2026-06-18 13:00:00  [submission-E2210...]  ⚠  OVER_CAP: Meal $118.00 exceeds $90.00 receipt cap
-2026-06-18 13:00:00  [submission-E2210...]  ✗  POLICY_VIOLATION: Alcohol charge $38.00 — rejected §4.3
-2026-06-18 13:00:00  [submission-E2210...]  →  OVERRIDE_APPROVE: Meal $118 approved — PL email 2026-04-12
-2026-06-18 13:00:00  [submission-E2210...]  →  OVERRIDE_APPROVE: Hotel $310 approved — PL email 2026-04-15
+2026-06-18 13:00:00  [submission-E2210...]  ⚠  Rule engine — 5 approved, 1 flagged, 1 rejected, 0 held, 2 overridden
+2026-06-18 13:00:00  [submission-E2210...]  ✗  Exception triage — 4 clean, 2 resolved, 1 rejected, 0 escalated, 0 BLOCKING
+2026-06-18 13:00:00  [submission-E2210...]  →  Supervisor: The pipeline found no unresolved exceptions — writing notices now.
+2026-06-18 13:00:00  [submission-E2210...]  ⚠  Notices — 1 employee notice(s) written, analyst summary written
+2026-06-18 13:00:00  [submission-E2210...]  ✓  Supervisor agent — pipeline complete
+2026-06-18 13:00:01  [submission-E2210...]  ✓  Email — 2 message(s) dispatched
 ------------------------------------------------------------------------
-RESULT  [submission-E2210...]  ✓ SUCCESS  completed 2026-06-18 13:00:01 UTC  (0.8s)
+RESULT  [submission-E2210...]  ✓ SUCCESS  completed 2026-06-18 13:00:01 EDT  (1.2s)
 ```
 
 Icon reference: `✓` ok · `⚠` warning/exception · `✗` error/rejection · `→` info/transition
